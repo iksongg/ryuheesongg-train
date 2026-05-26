@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>열차 조회 화면</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .phone-frame {
+      width: 402px;
+      min-height: 100vh;
+      background: #f5f5f5;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ── 상단바 ── */
+    .top-bar {
+      width: 402px;
+      background: white;
+      border-bottom: 1px solid #dbdbdb;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    /* 출도착지 바 */
+    .route-bar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .route-bar .back-btn {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .route-bar .route-center {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .route-bar .search-icon { width: 24px; height: 24px; }
+    .route-bar .route-names {
+      display: flex;
+      align-items: center;
+    }
+    .route-bar .station {
+      font-size: 22px;
+      font-weight: 700;
+      color: #000;
+      letter-spacing: -0.5px;
+    }
+    .route-bar .arrow-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .route-bar .refresh-btn {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* 날짜 바 */
+    .date-bar {
+      height: 48px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 0 16px;
+    }
+    .date-bar .date-nav {
+      display: flex;
+      align-items: center;
+      height: 48px;
+      cursor: pointer;
+    }
+    #date-prev { justify-content: flex-start; }
+    #date-next { justify-content: flex-end; }
+    .date-bar .date-nav .date-text {
+      font-size: 12px;
+      color: #757575;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+    .date-bar .date-current {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 48px;
+      gap: 2px;
+    }
+    .date-bar .calendar-icon { width: 24px; height: 24px; flex-shrink: 0; }
+    .date-bar .current-date {
+      font-size: 20px;
+      font-weight: 600;
+      color: #3a66af;
+      letter-spacing: -0.3px;
+      white-space: nowrap;
+    }
+
+    /* 열차 종류 탭 */
+    .train-type-tabs {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .train-type-tabs .tab {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #757575;
+      font-weight: 400;
+      cursor: pointer;
+      padding: 0 4px;
+      position: relative;
+    }
+    .train-type-tabs .tab.active {
+      color: #3a66af;
+      font-weight: 700;
+    }
+    .train-type-tabs .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #3a66af;
+      border-radius: 1px 1px 0 0;
+    }
+
+    /* ── 필터바 ── */
+    /* 48(route) + 48(date) + 48(tabs) = 144px */
+    .filter-bar {
+      width: 402px;
+      height: 60px;
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      position: sticky;
+      top: 144px;
+      z-index: 99;
+    }
+    .filter-bar .filter-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border: 1px solid #dbdbdb;
+      border-radius: 999px;
+      background: white;
+      cursor: pointer;
+    }
+    .filter-btn span {
+      font-size: 14px;
+      font-weight: 500;
+      color: #5b5b5b;
+    }
+    .soldout-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border: 1px solid #dbdbdb;
+      border-radius: 999px;
+      background: white;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .soldout-btn span {
+      font-size: 14px;
+      font-weight: 500;
+      color: #424242;
+    }
+
+    /* ── 열차 목록 ── */
+    .train-list {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* 열차 카드 공통 */
+    .train-card {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(58,102,175,0.08);
+    }
+
+    /* 카드 헤더 */
+    .card-header {
+      background: white;
+      border: 1px solid #e0eaf8;
+      border-bottom: 1px dashed #e0eaf8;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      border-radius: 8px 8px 0 0;
+    }
+    .card-header.soldout-header {
+      border-color: #dbdbdb;
+      border-bottom-style: solid;
+    }
+    .card-header .train-info {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .train-logo {
+      height: 13px;
+      max-height: 13px;
+      display: inline-flex;
+      align-items: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .train-logo svg { display: block; }
+    .train-logo img { height: 13px; max-height: 13px; width: auto; object-fit: contain; display: block; }
+    .train-number {
+      display: flex;
+      align-items: center;
+      gap: 1px;
+    }
+    .train-number span { font-size: 12px; color: #000; font-weight: 400; }
+    .train-number.soldout span { color: #c1c1c1; }
+    /* 열차비교 */
+    .compare-btn {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+      width: 60px;
+      cursor: pointer;
+    }
+    .compare-btn span { font-size: 12px; color: #8e8e8e; font-weight: 400; white-space: nowrap; }
+    .compare-badge {
+      width: 14px;
+      height: 14px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    /* 열차비교 플로팅바 */
+    .compare-float-bar {
+      position: fixed;
+      bottom: 37px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 250px;
+      height: 48px;
+      background: #3a66af;
+      border-radius: 77px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      z-index: 200;
+      box-shadow: 0 4px 20px rgba(58,102,175,0.4);
+    }
+    .compare-float-bar.visible { display: flex; }
+    .compare-float-bar .float-text {
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.3px;
+      font-family: 'Pretendard', sans-serif;
+    }
+    .soldout-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .soldout-badge {
+      background: #ff452c;
+      color: white;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+
+    /* 카드 바디 */
+    .card-body {
+      background: white;
+      border-left: 1px solid #e0eaf8;
+      border-right: 1px solid #e0eaf8;
+      padding: 14px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .card-body.soldout-body {
+      border-color: #dbdbdb;
+      gap: 16px;
+      padding: 14px 10px;
+    }
+    .departure, .arrival {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 63px;
+    }
+    .departure .time, .arrival .time {
+      font-size: 24px;
+      font-weight: 700;
+      color: #000;
+      letter-spacing: -0.5px;
+      line-height: 1.3;
+    }
+    .departure .time.soldout, .arrival .time.soldout { color: #c1c1c1; }
+    .departure .station-name, .arrival .station-name {
+      font-size: 10px;
+      color: #282828;
+      font-weight: 400;
+      text-align: center;
+      margin-top: 2px;
+    }
+    .departure .station-name.soldout, .arrival .station-name.soldout { color: #c1c1c1; font-weight: 500; }
+    .route-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+    }
+    .duration-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .duration-row .duration {
+      font-size: 12px;
+      font-weight: 500;
+      color: #3a66af;
+      white-space: nowrap;
+    }
+    .duration-row .duration.soldout { color: #8e8e8e; font-weight: 300; }
+    .duration-row .train-img {
+      width: 25px;
+      height: 10px;
+      object-fit: contain;
+    }
+    .route-line { display: none; }
+    .stops {
+      font-size: 10px;
+      color: #5b5b5b;
+      font-weight: 500;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* 카드 푸터 */
+    .card-footer {
+      display: flex;
+      border: 1px solid #e0eaf8;
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+    }
+    .card-footer.soldout-footer { border-color: #dbdbdb; }
+    .seat-section {
+      flex: 1;
+      background: #f6f9ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 55px;
+      padding: 6px 0;
+    }
+    .seat-section.soldout-section { background: white; }
+    .seat-label-row {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-bottom: 2px;
+    }
+    .seat-section.soldout-section .seat-label-row { gap: 4px; }
+    .seat-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #3a66af;
+    }
+    .seat-label.soldout-label { color: #c1c1c1; }
+    .seat-label.special { color: #113e62; }
+    .seat-count {
+      font-size: 10px;
+      font-weight: 500;
+      color: white;
+      padding: 1px 6px;
+      border-radius: 8px;
+    }
+    .seat-count.orange { background: #ff773c; }
+    .seat-count.blue   { background: #3a66af; }
+    .seat-count.gray   { background: #c1c1c1; }
+    .price {
+      font-size: 16px;
+      font-weight: 700;
+      color: #3a66af;
+    }
+
+
+    /* 매진제외 활성 시 매진카드 숨김 트랜지션 */
+    .soldout-card {
+      transition: opacity 0.15s;
+    }
+
+    @media (max-width: 402px) {
+      .phone-frame { width: 100%; }
+      .top-bar     { width: 100%; }
+      .filter-bar  { width: 100%; }
+    }
+
+    /* ── 바텀시트 오버레이 ── */
+    .sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .sheet-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ── 바텀시트 ── */
+    .compare-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      width: 402px;
+      height: 565px;
+      background: white;
+      border-radius: 8px 8px 0 0;
+      z-index: 301;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .compare-sheet.open {
+      transform: translateX(-50%) translateY(0);
+    }
+    .compare-sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 16px;
+      flex-shrink: 0;
+    }
+    .compare-sheet-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #000;
+      letter-spacing: -0.3px;
+    }
+    .compare-sheet-close {
+      width: 48px;
+      height: 48px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .compare-sheet-cards {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    @media (max-width: 402px) {
+      .compare-sheet { left: 0; transform: translateY(100%); width: 100%; }
+      .compare-sheet.open { transform: translateY(0); }
+    }
+
+    /* ══════════════════════════════
+       출도착지 / 날짜 변경 바텀시트 공통
+    ══════════════════════════════ */
+    .change-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      width: 402px;
+      background: white;
+      border-radius: 8px 8px 0 0;
+      z-index: 301;
+      transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+      overflow: hidden;
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.15);
+    }
+    .change-sheet.open { transform: translateX(-50%) translateY(0); }
+
+    .cs-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      height: 60px;
+      flex-shrink: 0;
+    }
+    .cs-header-left { display: flex; align-items: center; gap: 2px; }
+    .cs-title { font-size: 16px; font-weight: 600; color: #0f0f0f; letter-spacing: -0.3px; }
+    .cs-close {
+      width: 48px; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: none; background: none; padding: 0;
+    }
+    .cs-close:hover { opacity: 0.6; }
+    .cs-back-btn {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: none; background: none; padding: 0;
+      margin-left: -4px;
+    }
+    .cs-action-btn {
+      display: block;
+      margin: 12px auto 30px;
+      width: 250px; height: 48px;
+      background: #3a66af; color: white;
+      font-size: 16px; font-weight: 600;
+      font-family: 'Pretendard', sans-serif;
+      border: none; border-radius: 77px; cursor: pointer;
+    }
+    .cs-action-btn:hover { opacity: 0.9; }
+
+    /* ── 출도착지 시트 ── */
+    .trip-tabs { display: flex; flex-shrink: 0; }
+    .trip-tab {
+      flex: 1; height: 50px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 600;
+      font-family: 'Pretendard', sans-serif;
+      cursor: pointer; border: none; background: none; color: #0f0f0f;
+      border-bottom: 2px solid #dbdbdb;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .trip-tab.active { border-bottom-color: #3a66af; color: #3a66af; }
+
+    .stn-row {
+      display: flex; align-items: center; justify-content: center;
+      padding: 30px 0 25px;
+      border-bottom: 1px solid #f4f4f4;
+    }
+    .stn-pick-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      cursor: pointer; border: none; background: none;
+      font-family: 'Pretendard', sans-serif;
+      padding: 10px 20px; border-radius: 10px; min-width: 100px;
+      transition: background 0.15s;
+    }
+    .stn-pick-btn:hover { background: #f0f5ff; }
+    .stn-name { font-size: 22px; font-weight: 700; color: #0f0f0f; line-height: 1.3; }
+    .stn-code { font-size: 14px; font-weight: 500; color: #0f0f0f; text-transform: uppercase; line-height: 1.3; }
+    .stn-swap-btn {
+      width: 48px; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: none; background: none; padding: 0; flex-shrink: 0;
+    }
+
+    .cs-summary {
+      text-align: center; padding: 20px 0 0;
+      font-size: 18px; font-weight: 600; letter-spacing: -0.3px;
+    }
+    .cs-summary .cs-blue  { color: #3a66af; }
+    .cs-summary .cs-black { color: #0f0f0f; }
+
+    /* 역 선택 목록 */
+    .stn-pick-list { list-style: none; max-height: 320px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .stn-pick-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px; cursor: pointer;
+      border-bottom: 1px solid #f4f4f4; transition: background 0.1s;
+    }
+    .stn-pick-item:last-child { border-bottom: none; }
+    .stn-pick-item:hover { background: #f8f9ff; }
+    .stn-pick-item.active { background: #eef2fc; }
+    .stn-pick-left { display: flex; align-items: center; gap: 10px; }
+    .stn-pick-name { font-size: 16px; font-weight: 600; color: #0f0f0f; }
+    .stn-pick-code { font-size: 13px; font-weight: 500; color: #8e8e8e; text-transform: uppercase; }
+    .stn-pick-item.active .stn-pick-name { color: #3a66af; }
+    .stn-pick-item.active .stn-pick-code { color: #3a66af; }
+    .stn-pick-check { display: none; color: #3a66af; }
+    .stn-pick-item.active .stn-pick-check { display: block; }
+
+    /* ── 날짜 시트 ── */
+    .cal-month-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 32px; height: 38px; flex-shrink: 0;
+    }
+    .cal-month-label { font-size: 14px; font-weight: 600; color: #212121; letter-spacing: -0.3px; }
+    .cal-nav-arrows { display: flex; align-items: center; }
+    .cal-nav-btn {
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: none; background: none; color: #212121; padding: 0;
+    }
+    .cal-nav-btn:disabled { color: #d0d0d0; cursor: default; }
+
+    .cal-body { padding: 0 30px; flex-shrink: 0; }
+    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); height: 42px; align-items: center; }
+    .cal-weekday { text-align: center; font-size: 12.5px; font-weight: 600; color: #212121; }
+    .cal-grid {
+      display: flex; flex-direction: column; gap: 8px;
+      min-height: 262px; /* 6행×37px + 5gap×8px = 262px 고정 */
+    }
+    .cal-row { display: grid; grid-template-columns: repeat(7, 1fr); justify-items: center; }
+    .cal-cell {
+      width: 37px; height: 37px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 50%; user-select: none;
+    }
+    .cal-cell.empty, .cal-cell.past { cursor: default; }
+    .cal-cell-num { font-size: 12.5px; font-weight: 700; line-height: 1; color: #212121; opacity: 0.4; }
+    .cal-cell.past .cal-cell-num { color: #757575; opacity: 0.4; }
+    .cal-cell:not(.empty):not(.past):not(.sel):hover { background: #f0f5ff; }
+    .cal-today-lbl { font-size: 9px; color: #212121; opacity: 0.4; line-height: 1; margin-top: 2px; }
+    .cal-cell.sel { background: #3a66af; }
+    .cal-cell.sel .cal-cell-num { color: white; opacity: 1; }
+    .cal-cell.sel .cal-today-lbl { color: white; opacity: 0.8; }
+
+    .time-divider { height: 1px; background: #f0f0f0; margin: 16px 0 0; }
+
+    /* ── 시간 뱃지 ── */
+    .time-section-wrap { padding: 14px 0 0; }
+    .time-lbl { font-size: 14px; font-weight: 500; color: #0f0f0f; padding: 0 32px; margin-bottom: 10px; display: block; }
+    .time-chip-row {
+      display: flex; gap: 7px;
+      overflow-x: auto; padding: 2px 32px 6px;
+      -ms-overflow-style: none; scrollbar-width: none;
+      cursor: grab; user-select: none;
+    }
+    .time-chip-row:active { cursor: grabbing; }
+    .time-chip-row::-webkit-scrollbar { display: none; }
+    .time-chip {
+      flex-shrink: 0; height: 30px; min-width: 52px; padding: 0 8px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; font-size: 14px;
+      font-family: 'Pretendard', sans-serif; font-weight: 400;
+      cursor: pointer; border: 1px solid #f4f4f4;
+      background: white; color: #757575;
+      white-space: nowrap; pointer-events: auto;
+    }
+    .time-chip.sel {
+      background: #3a66af; color: white;
+      border-color: #3a66af; font-weight: 600;
+    }
+
+    .date-cs-summary {
+      text-align: center; padding: 12px 0 0;
+      font-size: 18px; font-weight: 600; letter-spacing: -0.3px; min-height: 46px;
+    }
+    .date-cs-summary .cs-blue  { color: #3a66af; }
+    .date-cs-summary .cs-black { color: #0f0f0f; }
+
+    /* ── 정렬 시트 옵션 ── */
+    .sort-option {
+      display: flex; align-items: center;
+      height: 48px; padding: 0 16px; gap: 6px;
+      border-bottom: 1px solid #dbdbdb;
+      cursor: pointer; transition: background 0.12s;
+    }
+    .sort-option:last-child { border-bottom: none; }
+    .sort-option:hover { background: #f8f9ff; }
+    .sort-opt-check {
+      width: 24px; height: 24px; flex-shrink: 0;
+      display: none; align-items: center; justify-content: center; color: #3a66af;
+    }
+    .sort-option.active .sort-opt-check { display: flex; }
+    .sort-opt-pad { width: 24px; flex-shrink: 0; } /* 비활성 옵션의 체크 아이콘 자리 */
+    .sort-opt-text {
+      font-size: 16px; color: #0f0f0f;
+      font-family: 'Pretendard', sans-serif; font-weight: 400;
+    }
+    .sort-option.active .sort-opt-text { color: #3a66af; font-weight: 600; }
+
+    @media (max-width: 402px) {
+      .change-sheet { left: 0; transform: translateY(100%); width: 100%; }
+      .change-sheet.open { transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+<div class="phone-frame">
+
+  <!-- ── 상단바 인스턴스 ── -->
+  <div id="root-top-bar"></div>
+
+  <!-- ── 필터바 인스턴스 ── -->
+  <div id="root-filter-bar"></div>
+
+  <!-- ── 열차 목록 ── -->
+  <div class="train-list" id="train-list"></div>
+
+  <!-- ── 열차비교 플로팅바 ── -->
+  <div class="compare-float-bar" id="compare-float-bar">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;display:block" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9.78075 15.5865H3.25C3.03717 15.5865 2.859 15.5148 2.7155 15.3713C2.57183 15.2276 2.5 15.0493 2.5 14.8365C2.5 14.6237 2.57183 14.4455 2.7155 14.302C2.859 14.1583 3.03717 14.0865 3.25 14.0865H9.78075L7.473 11.7787C7.33467 11.6404 7.26383 11.469 7.2605 11.2645C7.25733 11.06 7.32817 10.8802 7.473 10.725C7.62817 10.5698 7.80642 10.4922 8.00775 10.4922C8.20892 10.4922 8.38708 10.5698 8.54225 10.725L12.0213 14.2037C12.1148 14.2974 12.1807 14.3962 12.2192 14.5C12.2577 14.6038 12.277 14.716 12.277 14.8365C12.277 14.957 12.2577 15.0692 12.2192 15.173C12.1807 15.2768 12.1148 15.3756 12.0213 15.4692L8.527 18.9635C8.37817 19.1122 8.20408 19.1855 8.00475 19.1835C7.80542 19.1817 7.62817 19.1032 7.473 18.948C7.32817 18.7928 7.25317 18.6172 7.248 18.4212C7.243 18.2251 7.318 18.0494 7.473 17.8943L9.78075 15.5865ZM14.2193 9.90375L16.527 12.2115C16.6653 12.35 16.7362 12.5215 16.7395 12.726C16.7427 12.9305 16.6718 13.1103 16.527 13.2655C16.3718 13.4205 16.1936 13.498 15.9923 13.498C15.7911 13.498 15.6129 13.4205 15.4578 13.2655L11.9787 9.7865C11.8852 9.693 11.8193 9.59433 11.7808 9.4905C11.7423 9.38667 11.723 9.27442 11.723 9.15375C11.723 9.03325 11.7423 8.92108 11.7808 8.81725C11.8193 8.71342 11.8852 8.61475 11.9787 8.52125L15.473 5.027C15.6218 4.87833 15.7959 4.80492 15.9952 4.80675C16.1946 4.80875 16.3718 4.88725 16.527 5.04225C16.6718 5.19742 16.7468 5.37308 16.752 5.56925C16.757 5.76542 16.682 5.94108 16.527 6.09625L14.2193 8.404H20.75C20.9628 8.404 21.141 8.47575 21.2845 8.61925C21.4282 8.76292 21.5 8.94108 21.5 9.15375C21.5 9.36658 21.4282 9.54483 21.2845 9.6885C21.141 9.832 20.9628 9.90375 20.75 9.90375H14.2193Z" fill="white"/>
+    </svg>
+    <span class="float-text" id="compare-float-text">열차 비교하기(0)</span>
+  </div>
+
+
+</div>
+
+<!-- 컴포넌트 로드 -->
+<script src="components/Icons.js"></script>
+<script src="components/TopBar.js"></script>
+<script src="components/FilterBar.js"></script>
+<script src="components/TrainCard.js"></script>
+<script src="components/TrainCardSoldout.js"></script>
+
+<script>
+  /* ── 열차 데이터 (날짜별) ── */
+  var TRAIN_DATA_BY_DATE = {
+   '04.05(일)': [
+    {type:'normal',trainType:'KTX',trainNumber:'005',departTime:'05:58',arriveTime:'08:43',from:'서울',to:'부산',duration:'2시간 45분',stops:'서대구 정차',seats:[{label:'일반실',count:'2석',countClass:'orange',price:'59,400원'},{label:'특실/우등실',labelClass:'special',count:'15석',countClass:'blue',price:'83,200원'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'121',departTime:'06:03',arriveTime:'08:49',from:'서울',to:'부산',duration:'2시간 46분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'KTX',trainNumber:'007',departTime:'06:15',arriveTime:'08:58',from:'서울',to:'부산',duration:'2시간 43분',stops:'',collapsed:true,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'ITX-청춘',trainNumber:'1003',departTime:'06:33',arriveTime:'09:54',from:'서울',to:'부산',duration:'3시간 21분',stops:'',seats:[{label:'일반실',count:'55석',countClass:'blue',price:'42,600원'},{dash:true}]},
+    {type:'normal',trainType:'무궁화',trainNumber:'1151',departTime:'06:37',arriveTime:'12:11',from:'서울',to:'부산',duration:'5시간 34분',stops:'',seats:[{label:'일반실',count:'38석',countClass:'blue',price:'28,600원'},{dash:true}]},
+    {type:'soldout',trainType:'KTX',trainNumber:'009',departTime:'06:57',arriveTime:'09:39',from:'서울',to:'부산',duration:'2시간 42분',stops:'서대구 정차',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'KTX',trainNumber:'011',departTime:'07:00',arriveTime:'09:41',from:'서울',to:'부산',duration:'2시간 41분',stops:'직통',collapsed:true,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'무궁화',trainNumber:'1221',departTime:'07:45',arriveTime:'12:35',from:'서울',to:'부산',duration:'4시간 50분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'1001',departTime:'08:00',arriveTime:'12:10',from:'서울',to:'부산',duration:'4시간 10분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'KTX',trainNumber:'013',departTime:'08:30',arriveTime:'11:15',from:'서울',to:'부산',duration:'2시간 45분',stops:'직통',seats:[{label:'일반실',count:'4석',countClass:'orange',price:'59,400원'},{label:'특실',labelClass:'special',count:'8석',countClass:'blue',price:'83,200원'}]},
+   ],
+   '04.06(월)': [
+    {type:'normal',trainType:'KTX',trainNumber:'005',departTime:'05:58',arriveTime:'08:43',from:'서울',to:'부산',duration:'2시간 45분',stops:'서대구 정차',seats:[{label:'일반실',count:'45석',countClass:'blue',price:'59,400원'},{label:'특실/우등실',labelClass:'special',count:'31석',countClass:'blue',price:'83,200원'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'121',departTime:'06:03',arriveTime:'08:49',from:'서울',to:'부산',duration:'2시간 46분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'KTX',trainNumber:'007',departTime:'06:15',arriveTime:'08:58',from:'서울',to:'부산',duration:'2시간 43분',stops:'',collapsed:true,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'ITX-청춘',trainNumber:'1003',departTime:'06:33',arriveTime:'09:54',from:'서울',to:'부산',duration:'3시간 21분',stops:'',seats:[{label:'일반실',count:'148석',countClass:'blue',price:'42,600원'},{dash:true}]},
+    {type:'normal',trainType:'무궁화',trainNumber:'1151',departTime:'06:37',arriveTime:'12:11',from:'서울',to:'부산',duration:'5시간 34분',stops:'',seats:[{label:'일반실',count:'89석',countClass:'blue',price:'28,600원'},{dash:true}]},
+    {type:'normal',trainType:'KTX',trainNumber:'009',departTime:'06:57',arriveTime:'09:39',from:'서울',to:'부산',duration:'2시간 42분',stops:'서대구 정차',seats:[{label:'일반실',count:'22석',countClass:'blue',price:'59,400원'},{label:'특실/우등실',labelClass:'special',count:'15석',countClass:'blue',price:'83,700원'}]},
+    {type:'normal',trainType:'KTX',trainNumber:'011',departTime:'07:00',arriveTime:'09:41',from:'서울',to:'부산',duration:'2시간 41분',stops:'직통',seats:[{label:'일반실',count:'62석',countClass:'blue',price:'59,400원'},{label:'특실',labelClass:'special',count:'18석',countClass:'blue',price:'83,200원'}]},
+    {type:'soldout',trainType:'무궁화',trainNumber:'1221',departTime:'07:45',arriveTime:'12:35',from:'서울',to:'부산',duration:'4시간 50분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'1001',departTime:'08:00',arriveTime:'12:10',from:'서울',to:'부산',duration:'4시간 10분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'KTX',trainNumber:'013',departTime:'08:30',arriveTime:'11:15',from:'서울',to:'부산',duration:'2시간 45분',stops:'직통',seats:[{label:'일반실',count:'38석',countClass:'blue',price:'59,400원'},{label:'특실',labelClass:'special',count:'25석',countClass:'blue',price:'83,200원'}]},
+   ],
+   '04.07(화)': [
+    {type:'normal',trainType:'KTX',trainNumber:'005',departTime:'05:58',arriveTime:'08:43',from:'서울',to:'부산',duration:'2시간 45분',stops:'서대구 정차',seats:[{label:'일반실',count:'3석',countClass:'orange',price:'59,400원'},{label:'특실/우등실',labelClass:'special',count:'27석',countClass:'blue',price:'83,200원'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'121',departTime:'06:03',arriveTime:'08:49',from:'서울',to:'부산',duration:'2시간 46분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'KTX',trainNumber:'007',departTime:'06:15',arriveTime:'08:58',from:'서울',to:'부산',duration:'2시간 43분',stops:'',collapsed:true,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'ITX-청춘',trainNumber:'1003',departTime:'06:33',arriveTime:'09:54',from:'서울',to:'부산',duration:'3시간 21분',stops:'',seats:[{label:'일반실',count:'102석',countClass:'blue',price:'42,600원'},{dash:true}]},
+    {type:'normal',trainType:'무궁화',trainNumber:'1151',departTime:'06:37',arriveTime:'12:11',from:'서울',to:'부산',duration:'5시간 34분',stops:'',seats:[{label:'일반실',count:'57석',countClass:'blue',price:'28,600원'},{dash:true}]},
+    {type:'normal',trainType:'KTX',trainNumber:'009',departTime:'06:57',arriveTime:'09:39',from:'서울',to:'부산',duration:'2시간 42분',stops:'서대구 정차',seats:[{label:'일반실',count:'입석+좌석',countClass:'blue',price:'예약대기'},{label:'특실/우등실',labelClass:'special',count:'7석',countClass:'blue',price:'83,700원'}]},
+    {type:'normal',trainType:'KTX',trainNumber:'011',departTime:'07:00',arriveTime:'09:41',from:'서울',to:'부산',duration:'2시간 41분',stops:'직통',seats:[{label:'일반실',count:'58석',countClass:'blue',price:'59,400원'},{label:'특실',labelClass:'special',count:'12석',countClass:'blue',price:'83,200원'}]},
+    {type:'soldout',trainType:'무궁화',trainNumber:'1221',departTime:'07:45',arriveTime:'12:35',from:'서울',to:'부산',duration:'4시간 50분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'1001',departTime:'08:00',arriveTime:'12:10',from:'서울',to:'부산',duration:'4시간 10분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'KTX',trainNumber:'013',departTime:'08:30',arriveTime:'11:15',from:'서울',to:'부산',duration:'2시간 45분',stops:'직통',seats:[{label:'일반실',count:'5석',countClass:'orange',price:'59,400원'},{label:'특실',labelClass:'special',count:'31석',countClass:'blue',price:'83,200원'}]},
+   ],
+   '04.08(수)': [
+    {type:'normal',trainType:'KTX',trainNumber:'005',departTime:'05:58',arriveTime:'08:43',from:'서울',to:'부산',duration:'2시간 45분',stops:'서대구 정차',seats:[{label:'일반실',count:'8석',countClass:'orange',price:'59,400원'},{label:'특실/우등실',labelClass:'special',count:'19석',countClass:'blue',price:'83,200원'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'121',departTime:'06:03',arriveTime:'08:49',from:'서울',to:'부산',duration:'2시간 46분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'KTX',trainNumber:'007',departTime:'06:15',arriveTime:'08:58',from:'서울',to:'부산',duration:'2시간 43분',stops:'',collapsed:true,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'ITX-청춘',trainNumber:'1003',departTime:'06:33',arriveTime:'09:54',from:'서울',to:'부산',duration:'3시간 21분',stops:'',seats:[{label:'일반실',count:'95석',countClass:'blue',price:'42,600원'},{dash:true}]},
+    {type:'normal',trainType:'무궁화',trainNumber:'1151',departTime:'06:37',arriveTime:'12:11',from:'서울',to:'부산',duration:'5시간 34분',stops:'',seats:[{label:'일반실',count:'63석',countClass:'blue',price:'28,600원'},{dash:true}]},
+    {type:'normal',trainType:'KTX',trainNumber:'009',departTime:'06:57',arriveTime:'09:39',from:'서울',to:'부산',duration:'2시간 42분',stops:'서대구 정차',seats:[{label:'일반실',count:'입석+좌석',countClass:'blue',price:'예약대기'},{label:'특실/우등실',labelClass:'special',count:'11석',countClass:'blue',price:'83,700원'}]},
+    {type:'normal',trainType:'KTX',trainNumber:'011',departTime:'07:00',arriveTime:'09:41',from:'서울',to:'부산',duration:'2시간 41분',stops:'직통',seats:[{label:'일반실',count:'41석',countClass:'blue',price:'59,400원'},{label:'특실',labelClass:'special',count:'24석',countClass:'blue',price:'83,200원'}]},
+    {type:'soldout',trainType:'무궁화',trainNumber:'1221',departTime:'07:45',arriveTime:'12:35',from:'서울',to:'부산',duration:'4시간 50분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'1001',departTime:'08:00',arriveTime:'12:10',from:'서울',to:'부산',duration:'4시간 10분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'KTX',trainNumber:'013',departTime:'08:30',arriveTime:'11:15',from:'서울',to:'부산',duration:'2시간 45분',stops:'직통',seats:[{label:'일반실',count:'17석',countClass:'blue',price:'59,400원'},{label:'특실',labelClass:'special',count:'14석',countClass:'blue',price:'83,200원'}]},
+   ],
+   '04.09(목)': [
+    {type:'normal',trainType:'KTX',trainNumber:'005',departTime:'05:58',arriveTime:'08:43',from:'서울',to:'부산',duration:'2시간 45분',stops:'서대구 정차',seats:[{label:'일반실',count:'23석',countClass:'blue',price:'59,400원'},{label:'특실/우등실',labelClass:'special',count:'42석',countClass:'blue',price:'83,200원'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'121',departTime:'06:03',arriveTime:'08:49',from:'서울',to:'부산',duration:'2시간 46분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'KTX',trainNumber:'007',departTime:'06:15',arriveTime:'08:58',from:'서울',to:'부산',duration:'2시간 43분',stops:'',collapsed:true,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'ITX-청춘',trainNumber:'1003',departTime:'06:33',arriveTime:'09:54',from:'서울',to:'부산',duration:'3시간 21분',stops:'',seats:[{label:'일반실',count:'113석',countClass:'blue',price:'42,600원'},{dash:true}]},
+    {type:'normal',trainType:'무궁화',trainNumber:'1151',departTime:'06:37',arriveTime:'12:11',from:'서울',to:'부산',duration:'5시간 34분',stops:'',seats:[{label:'일반실',count:'71석',countClass:'blue',price:'28,600원'},{dash:true}]},
+    {type:'normal',trainType:'KTX',trainNumber:'009',departTime:'06:57',arriveTime:'09:39',from:'서울',to:'부산',duration:'2시간 42분',stops:'서대구 정차',seats:[{label:'일반실',count:'7석',countClass:'orange',price:'59,400원'},{label:'특실/우등실',labelClass:'special',count:'5석',countClass:'orange',price:'83,700원'}]},
+    {type:'normal',trainType:'KTX',trainNumber:'011',departTime:'07:00',arriveTime:'09:41',from:'서울',to:'부산',duration:'2시간 41분',stops:'직통',seats:[{label:'일반실',count:'55석',countClass:'blue',price:'59,400원'},{label:'특실',labelClass:'special',count:'31석',countClass:'blue',price:'83,200원'}]},
+    {type:'soldout',trainType:'무궁화',trainNumber:'1221',departTime:'07:45',arriveTime:'12:35',from:'서울',to:'부산',duration:'4시간 50분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'1001',departTime:'08:00',arriveTime:'12:10',from:'서울',to:'부산',duration:'4시간 10분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'KTX',trainNumber:'013',departTime:'08:30',arriveTime:'11:15',from:'서울',to:'부산',duration:'2시간 45분',stops:'직통',seats:[{label:'일반실',count:'29석',countClass:'blue',price:'59,400원'},{label:'특실',labelClass:'special',count:'19석',countClass:'blue',price:'83,200원'}]},
+   ],
+   '04.10(금)': [
+    {type:'normal',trainType:'KTX',trainNumber:'005',departTime:'05:58',arriveTime:'08:43',from:'서울',to:'부산',duration:'2시간 45분',stops:'서대구 정차',seats:[{label:'일반실',count:'1석',countClass:'orange',price:'59,400원'},{label:'특실/우등실',labelClass:'special',count:'3석',countClass:'orange',price:'83,200원'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'121',departTime:'06:03',arriveTime:'08:49',from:'서울',to:'부산',duration:'2시간 46분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'KTX',trainNumber:'007',departTime:'06:15',arriveTime:'08:58',from:'서울',to:'부산',duration:'2시간 43분',stops:'',collapsed:true,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'ITX-청춘',trainNumber:'1003',departTime:'06:33',arriveTime:'09:54',from:'서울',to:'부산',duration:'3시간 21분',stops:'',seats:[{label:'일반실',count:'47석',countClass:'blue',price:'42,600원'},{dash:true}]},
+    {type:'normal',trainType:'무궁화',trainNumber:'1151',departTime:'06:37',arriveTime:'12:11',from:'서울',to:'부산',duration:'5시간 34분',stops:'',seats:[{label:'일반실',count:'38석',countClass:'blue',price:'28,600원'},{dash:true}]},
+    {type:'normal',trainType:'KTX',trainNumber:'009',departTime:'06:57',arriveTime:'09:39',from:'서울',to:'부산',duration:'2시간 42분',stops:'서대구 정차',seats:[{label:'일반실',count:'입석+좌석',countClass:'blue',price:'예약대기'},{label:'특실/우등실',labelClass:'special',count:'2석',countClass:'orange',price:'83,700원'}]},
+    {type:'normal',trainType:'KTX',trainNumber:'011',departTime:'07:00',arriveTime:'09:41',from:'서울',to:'부산',duration:'2시간 41분',stops:'직통',seats:[{label:'일반실',count:'5석',countClass:'orange',price:'59,400원'},{label:'특실',labelClass:'special',count:'8석',countClass:'orange',price:'83,200원'}]},
+    {type:'soldout',trainType:'무궁화',trainNumber:'1221',departTime:'07:45',arriveTime:'12:35',from:'서울',to:'부산',duration:'4시간 50분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'1001',departTime:'08:00',arriveTime:'12:10',from:'서울',to:'부산',duration:'4시간 10분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'KTX',trainNumber:'013',departTime:'08:30',arriveTime:'11:15',from:'서울',to:'부산',duration:'2시간 45분',stops:'직통',seats:[{label:'일반실',count:'3석',countClass:'orange',price:'59,400원'},{label:'특실',labelClass:'special',count:'6석',countClass:'orange',price:'83,200원'}]},
+   ],
+   '04.11(토)': [
+    {type:'soldout',trainType:'KTX',trainNumber:'005',departTime:'05:58',arriveTime:'08:43',from:'서울',to:'부산',duration:'2시간 45분',stops:'서대구 정차',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'121',departTime:'06:03',arriveTime:'08:49',from:'서울',to:'부산',duration:'2시간 46분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'KTX',trainNumber:'007',departTime:'06:15',arriveTime:'08:58',from:'서울',to:'부산',duration:'2시간 43분',stops:'',collapsed:true,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'ITX-청춘',trainNumber:'1003',departTime:'06:33',arriveTime:'09:54',from:'서울',to:'부산',duration:'3시간 21분',stops:'',seats:[{label:'일반실',count:'12석',countClass:'orange',price:'42,600원'},{dash:true}]},
+    {type:'normal',trainType:'무궁화',trainNumber:'1151',departTime:'06:37',arriveTime:'12:11',from:'서울',to:'부산',duration:'5시간 34분',stops:'',seats:[{label:'일반실',count:'25석',countClass:'blue',price:'28,600원'},{dash:true}]},
+    {type:'soldout',trainType:'KTX',trainNumber:'009',departTime:'06:57',arriveTime:'09:39',from:'서울',to:'부산',duration:'2시간 42분',stops:'서대구 정차',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'KTX',trainNumber:'011',departTime:'07:00',arriveTime:'09:41',from:'서울',to:'부산',duration:'2시간 41분',stops:'직통',collapsed:true,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'무궁화',trainNumber:'1221',departTime:'07:45',arriveTime:'12:35',from:'서울',to:'부산',duration:'4시간 50분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'soldout',trainType:'새마을',trainNumber:'1001',departTime:'08:00',arriveTime:'12:10',from:'서울',to:'부산',duration:'4시간 10분',stops:'',collapsed:false,seats:[{label:'일반실'},{label:'특실/우등실'}]},
+    {type:'normal',trainType:'KTX',trainNumber:'013',departTime:'08:30',arriveTime:'11:15',from:'서울',to:'부산',duration:'2시간 45분',stops:'직통',seats:[{label:'일반실',count:'2석',countClass:'orange',price:'59,400원'},{label:'특실',labelClass:'special',count:'5석',countClass:'orange',price:'83,200원'}]},
+   ],
+  };
+
+  /* ── 상태 변수 ── */
+  var activeTab     = '전체';
+  var soldoutActive = false;
+  var compareSelected = {};
+
+  /* ── 정렬 상태 ── */
+  var currentSort = '빠른시간순'; /* 기본값: 출발시간 빠른순 */
+
+  /* ── 출도착지 상태 ── */
+  var appliedDep = { name: '서울', code: 'SEL' };
+  var appliedArr = { name: '부산', code: 'BUS' };
+  var appliedTripType = 'oneway';
+  var routeTempDep, routeTempArr, routeTempTripType, routePickerFor;
+
+  /* ── 날짜/시간 상태 ── */
+  var calAppliedHour  = 6;
+  var calTempDate, calTempHour, calViewYear, calViewMonth;
+
+  var CAL_DAYS = ['일','월','화','수','목','금','토'];
+  var TODAY    = new Date(2026, 3, 7); /* 가상 오늘: 2026년 4월 7일 */
+
+  var STATIONS = [
+    {name:'서울',    code:'SEL'}, {name:'용산',    code:'YSN'},
+    {name:'수서',    code:'SOS'}, {name:'광명',    code:'GMG'},
+    {name:'천안아산',code:'CAS'}, {name:'오송',    code:'OGS'},
+    {name:'대전',    code:'DJN'}, {name:'서대전',  code:'SDJ'},
+    {name:'김천구미',code:'GGU'}, {name:'동대구',  code:'DDG'},
+    {name:'신경주',  code:'SKJ'}, {name:'울산',    code:'ULS'},
+    {name:'부산',    code:'BUS'}, {name:'창원중앙',code:'CWC'},
+    {name:'마산',    code:'MSN'}, {name:'진주',    code:'JJU'},
+    {name:'익산',    code:'IKS'}, {name:'전주',    code:'JNJ'},
+    {name:'광주송정',code:'GSJ'}, {name:'나주',    code:'NJU'},
+    {name:'목포',    code:'MPO'}, {name:'여수EXPO',code:'YSE'},
+    {name:'포항',    code:'POH'},
+  ];
+  var COMPARE_CHECKED = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" width="14" height="14">' +
+    '<circle cx="7" cy="7" r="6.5" fill="#3a66af"/>' +
+    '<polyline points="3.5,7 5.5,9.2 10.5,4.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' +
+    '</svg>'
+  );
+  var COMPARE_UNCHECK = Icons.compareUncheck;
+  var DATES = ['04.05(일)','04.06(월)','04.07(화)','04.08(수)','04.09(목)','04.10(금)','04.11(토)'];
+  var curIdx = 2;
+
+  /* ── 렌더 함수 ── */
+  function renderTopBar() {
+    document.getElementById('root-top-bar').innerHTML = TopBar.create({
+      from: appliedDep.name, to: appliedArr.name,
+      currentDate: DATES[curIdx],
+      prevDate:    curIdx > 0                ? DATES[curIdx - 1] : '',
+      nextDate:    curIdx < DATES.length - 1 ? DATES[curIdx + 1] : '',
+      activeTab:   activeTab,
+    });
+  }
+
+  /* ── 정렬 헬퍼 ── */
+  function parseDurMin(s) {
+    var h = 0, m = 0;
+    var hm = (s || '').match(/(\d+)시간/); var mm = (s || '').match(/(\d+)분/);
+    if (hm) h = parseInt(hm[1]); if (mm) m = parseInt(mm[1]);
+    return h * 60 + m;
+  }
+  function parseMinPrice(seats) {
+    var min = Infinity;
+    (seats || []).forEach(function (s) {
+      if (!s.price || s.dash) return;
+      var n = parseInt(s.price.replace(/[^0-9]/g, ''));
+      if (!isNaN(n) && n < min) min = n;
+    });
+    return min;
+  }
+  function parseDepartMin(t) {
+    var p = (t || '00:00').split(':');
+    return parseInt(p[0]) * 60 + parseInt(p[1]);
+  }
+  function sortData(arr) {
+    var copy = arr.slice();
+    switch (currentSort) {
+      case '최단소요순':
+        copy.sort(function (a, b) { return parseDurMin(a.duration) - parseDurMin(b.duration); });
+        break;
+      case '최저가순':
+        copy.sort(function (a, b) { return parseMinPrice(a.seats) - parseMinPrice(b.seats); });
+        break;
+      case '느린시간순':
+        copy.sort(function (a, b) { return parseDepartMin(b.departTime) - parseDepartMin(a.departTime); });
+        break;
+      case '빠른시간순':
+        copy.sort(function (a, b) { return parseDepartMin(a.departTime) - parseDepartMin(b.departTime); });
+        break;
+    }
+    return copy;
+  }
+
+  function renderTrainList() {
+    var data     = TRAIN_DATA_BY_DATE[DATES[curIdx]] || [];
+    var filtered = data.filter(function (d) {
+      if (soldoutActive && d.type === 'soldout') return false;
+      if (activeTab === '전체') return true;
+      return d.trainType === activeTab;
+    });
+    var sorted = sortData(filtered);
+    var list = document.getElementById('train-list');
+    list.innerHTML = sorted.map(function (d) {
+      return d.type === 'normal' ? TrainCard.create(d) : TrainCardSoldout.create(d);
+    }).join('');
+    Object.keys(compareSelected).forEach(function (id) {
+      var img = document.querySelector('#train-list [data-compare-id="' + id + '"] [data-compare-badge] img');
+      if (img) img.src = COMPARE_CHECKED;
+    });
+  }
+
+  /* ── 날짜 변경 핵심 함수 ── */
+  function changeDate(newIdx) {
+    if (newIdx < 0 || newIdx >= DATES.length) return;
+    curIdx = newIdx;
+    compareSelected = {};          /* 날짜 바뀌면 비교 선택 초기화 */
+    updateCompareBar();
+    renderTopBar();
+    renderTrainList();
+  }
+
+  /* TopBar onclick에서 직접 호출되는 전역 함수 */
+  window._goPrevDate   = function () { changeDate(curIdx - 1); };
+  window._goNextDate   = function () { changeDate(curIdx + 1); };
+  window._openDateSheet = function () { openDateSheet(); };
+
+  /* ── 초기화 ── */
+  function init() {
+    renderTopBar();
+    document.getElementById('root-filter-bar').innerHTML = FilterBar.create({ soldoutActive: soldoutActive, currentSort: currentSort });
+    renderTrainList();
+  }
+
+  init();
+
+  /* ── 탭 상호작용 ── */
+  document.addEventListener('click', function (e) {
+    var tab = e.target.closest('.tab');
+    if (tab) {
+      activeTab = tab.getAttribute('data-tab');
+      document.querySelectorAll('.train-type-tabs .tab').forEach(function (t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      renderTrainList();
+    }
+  });
+
+  /* ── 날짜 네비게이션 (event delegation 보조) ── */
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('#date-prev')) { changeDate(curIdx - 1); }
+    if (e.target.closest('#date-next')) { changeDate(curIdx + 1); }
+  });
+
+  /* ── 매진제외 토글 ── */
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('#soldout-btn')) return;
+    soldoutActive = !soldoutActive;
+    document.getElementById('root-filter-bar').innerHTML = FilterBar.create({ soldoutActive: soldoutActive, currentSort: currentSort });
+    renderTrainList();
+  });
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-compare-btn]');
+    if (!btn) return;
+    e.stopPropagation();
+
+    var card = btn.closest('[data-compare-id]');
+    if (!card) return;
+    var id = card.getAttribute('data-compare-id');
+
+    var badge = btn.querySelector('[data-compare-badge]');
+    var img   = badge && badge.querySelector('img');
+    if (!badge || !img) return;
+
+    var isInSheet = !!card.closest('#compare-sheet-cards');
+
+    if (!compareSelected[id]) {
+      compareSelected[id] = true;
+      img.src = COMPARE_CHECKED;
+    } else {
+      delete compareSelected[id];
+      img.src = COMPARE_UNCHECK;
+
+      if (isInSheet) {
+        /* 바텀시트 내 해제: 카드 제거 + 메인 목록 배지 동기화 */
+        card.remove();
+        var mainImg = document.querySelector('#train-list [data-compare-id="' + id + '"] [data-compare-badge] img');
+        if (mainImg) mainImg.src = COMPARE_UNCHECK;
+        if (Object.keys(compareSelected).length === 0) closeCompareSheet();
+      }
+    }
+    updateCompareBar();
+  });
+
+  /* ── 바텀시트 열기/닫기 ── */
+  document.getElementById('compare-float-bar').addEventListener('click', openCompareSheet);
+
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('#compare-sheet-close')) { closeCompareSheet(); return; }
+    if (e.target.id === 'sheet-overlay') {
+      closeCompareSheet();
+      closeSortSheet();
+      closeRouteSheet();
+      closeDateSheet();
+    }
+  });
+
+  function openCompareSheet() {
+    var cardsEl = document.getElementById('compare-sheet-cards');
+    cardsEl.innerHTML = (TRAIN_DATA_BY_DATE[DATES[curIdx]] || [])
+      .filter(function (d) { return d.type === 'normal' && compareSelected[d.trainNumber]; })
+      .map(function (d) { return TrainCard.create(d); })
+      .join('');
+    /* 바텀시트 내 모든 비교 배지를 활성(checked) 상태로 설정 */
+    cardsEl.querySelectorAll('[data-compare-badge] img').forEach(function (img) {
+      img.src = COMPARE_CHECKED;
+    });
+    document.getElementById('sheet-overlay').classList.add('open');
+    document.getElementById('compare-sheet').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCompareSheet() {
+    document.getElementById('sheet-overlay').classList.remove('open');
+    document.getElementById('compare-sheet').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function updateCompareBar() {
+    var bar   = document.getElementById('compare-float-bar');
+    var count = Object.keys(compareSelected).length;
+    if (count > 0) {
+      bar.classList.add('visible');
+      document.getElementById('compare-float-text').textContent = '열차 비교하기(' + count + ')';
+    } else {
+      bar.classList.remove('visible');
+    }
+  }
+
+  /* ════════════════════════════════════════
+     정렬 바텀시트 로직
+  ════════════════════════════════════════ */
+  function openSortSheet() {
+    renderSortOptions();
+    openOverlay();
+    document.getElementById('sort-sheet').classList.add('open');
+  }
+  function closeSortSheet() {
+    document.getElementById('sort-sheet').classList.remove('open');
+    closeOverlay();
+  }
+  function renderSortOptions() {
+    document.querySelectorAll('#sort-options-list .sort-option').forEach(function (opt) {
+      opt.classList.toggle('active', opt.dataset.sort === currentSort);
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    /* 정렬 버튼 열기 */
+    if (e.target.closest('#sort-btn')) { openSortSheet(); return; }
+    /* 닫기 */
+    if (e.target.closest('#sort-close-btn')) { closeSortSheet(); return; }
+    /* 옵션 선택 */
+    var opt = e.target.closest('#sort-options-list .sort-option');
+    if (opt) {
+      currentSort = opt.dataset.sort;
+      renderSortOptions();
+      renderTrainList();
+      document.getElementById('root-filter-bar').innerHTML =
+        FilterBar.create({ soldoutActive: soldoutActive, currentSort: currentSort });
+      closeSortSheet();
+    }
+  });
+
+  /* ════════════════════════════════════════
+     출도착지 변경 바텀시트 로직
+  ════════════════════════════════════════ */
+  function openRouteSheet() {
+    routeTempDep      = { name: appliedDep.name, code: appliedDep.code };
+    routeTempArr      = { name: appliedArr.name, code: appliedArr.code };
+    routeTempTripType = appliedTripType;
+    showRouteMain();
+    renderRouteMain();
+    openOverlay();
+    document.getElementById('route-sheet').classList.add('open');
+  }
+
+  function closeRouteSheet() {
+    document.getElementById('route-sheet').classList.remove('open');
+    closeOverlay();
+  }
+
+  function showRouteMain() {
+    document.getElementById('route-sheet-main').style.display  = 'block';
+    document.getElementById('route-sheet-picker').style.display = 'none';
+  }
+
+  function renderRouteMain() {
+    document.getElementById('rs-dep-name').textContent = routeTempDep.name;
+    document.getElementById('rs-dep-code').textContent = routeTempDep.code;
+    document.getElementById('rs-arr-name').textContent = routeTempArr.name;
+    document.getElementById('rs-arr-code').textContent = routeTempArr.code;
+    document.getElementById('trip-oneway').className = 'trip-tab' + (routeTempTripType === 'oneway'    ? ' active' : '');
+    document.getElementById('trip-round').className  = 'trip-tab' + (routeTempTripType === 'roundtrip' ? ' active' : '');
+    document.getElementById('route-cs-summary').innerHTML =
+      '<span class="cs-blue">'  + routeTempDep.name + ' → ' + routeTempArr.name + ' </span>' +
+      '<span class="cs-black">탑승객 1명</span>';
+  }
+
+  function openStationPicker(type) {
+    routePickerFor = type;
+    document.getElementById('rs-picker-title').textContent = type === 'dep' ? '출발역 선택' : '도착역 선택';
+    var cur  = type === 'dep' ? routeTempDep.code : routeTempArr.code;
+    var list = document.getElementById('rs-station-list');
+    list.innerHTML = '';
+    STATIONS.forEach(function (s) {
+      var isSel = s.code === cur;
+      var li = document.createElement('li');
+      li.className = 'stn-pick-item' + (isSel ? ' active' : '');
+      li.innerHTML =
+        '<div class="stn-pick-left"><span class="stn-pick-name">' + s.name + '</span><span class="stn-pick-code">' + s.code + '</span></div>' +
+        '<span class="stn-pick-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>';
+      li.addEventListener('click', function () { selectStation(s); });
+      list.appendChild(li);
+    });
+    document.getElementById('route-sheet-main').style.display  = 'none';
+    document.getElementById('route-sheet-picker').style.display = 'block';
+  }
+
+  function selectStation(s) {
+    if (routePickerFor === 'dep') {
+      if (s.code === routeTempArr.code) routeTempArr = { name: routeTempDep.name, code: routeTempDep.code };
+      routeTempDep = { name: s.name, code: s.code };
+    } else {
+      if (s.code === routeTempDep.code) routeTempDep = { name: routeTempArr.name, code: routeTempArr.code };
+      routeTempArr = { name: s.name, code: s.code };
+    }
+    showRouteMain();
+    renderRouteMain();
+  }
+
+  /* ════════════════════════════════════════
+     날짜 변경 바텀시트 로직
+  ════════════════════════════════════════ */
+  function getDateFromCurIdx() {
+    /* DATES 형식 'MM.DD(요일)' → Date 객체 */
+    var m = DATES[curIdx].match(/(\d+)\.(\d+)/);
+    if (!m) return new Date();
+    return new Date(2026, parseInt(m[1]) - 1, parseInt(m[2]));
+  }
+
+  function openDateSheet() {
+    calTempDate  = getDateFromCurIdx();
+    calTempHour  = calAppliedHour;
+    calViewYear  = calTempDate.getFullYear();
+    calViewMonth = calTempDate.getMonth();
+    renderCalSheet();
+    updateCalSummary();
+    initTimeChipsOnce();
+    updateTimeChipsUI();
+    openOverlay();
+    document.getElementById('date-sheet').classList.add('open');
+  }
+
+  function closeDateSheet() {
+    document.getElementById('date-sheet').classList.remove('open');
+    closeOverlay();
+  }
+
+  function renderCalSheet() {
+    document.getElementById('cal-month-lbl').textContent =
+      calViewYear + '년 ' + (calViewMonth + 1 < 10 ? '0' : '') + (calViewMonth + 1) + '월';
+
+    var grid     = document.getElementById('cal-grid-cs');
+    grid.innerHTML = '';
+
+    var firstDow = new Date(calViewYear, calViewMonth, 1).getDay();
+    var lastDay  = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+    var cells    = [];
+    for (var i = 0; i < firstDow; i++) cells.push(null);
+    for (var d = 1; d <= lastDay; d++) cells.push(d);
+    while (cells.length < 42) cells.push(null); /* 항상 6행(42칸) 고정 */
+
+    for (var r = 0; r < cells.length / 7; r++) {
+      var row = document.createElement('div');
+      row.className = 'cal-row';
+      for (var c = 0; c < 7; c++) {
+        var day  = cells[r * 7 + c];
+        var cell = document.createElement('div');
+        cell.className = 'cal-cell';
+        if (!day) {
+          cell.classList.add('empty');
+        } else {
+          var cd      = new Date(calViewYear, calViewMonth, day);
+          var isToday = cd.getTime() === TODAY.getTime();
+          var isPast  = cd < TODAY;
+          var isSel   = calTempDate && cd.getTime() === calTempDate.getTime();
+          if (isPast)  cell.classList.add('past');
+          if (isToday) cell.classList.add('today');
+          if (isSel)   cell.classList.add('sel');
+          var numEl = document.createElement('span');
+          numEl.className   = 'cal-cell-num';
+          numEl.textContent = day;
+          cell.appendChild(numEl);
+          if (isToday) {
+            var lbl = document.createElement('span');
+            lbl.className   = 'cal-today-lbl';
+            lbl.textContent = '오늘';
+            cell.appendChild(lbl);
+          }
+          if (!isPast) {
+            (function (yr, mo, dy) {
+              cell.addEventListener('click', function () {
+                calTempDate = new Date(yr, mo, dy);
+                renderCalSheet();
+                updateCalSummary();
+              });
+            })(calViewYear, calViewMonth, day);
+          }
+        }
+        row.appendChild(cell);
+      }
+      grid.appendChild(row);
+    }
+  }
+
+  function updateCalSummary() {
+    if (!calTempDate) return;
+    var m   = calTempDate.getMonth() + 1;
+    var d   = calTempDate.getDate();
+    var dow = CAL_DAYS[calTempDate.getDay()];
+    document.getElementById('cal-date-summary').innerHTML =
+      '<span class="cs-blue">' + m + '월 ' + d + '일(' + dow + ') ' +
+      (calTempHour < 10 ? '0' : '') + calTempHour + '시 </span>' +
+      '<span class="cs-black">이후 출발</span>';
+  }
+
+  /* ── 시간 뱃지 ── */
+  var timeChipsReady = false;
+
+  function initTimeChipsOnce() {
+    if (timeChipsReady) return;
+    timeChipsReady = true;
+
+    /* 00~23시 뱃지 생성 */
+    var row = document.getElementById('time-chip-row');
+    for (var h = 0; h < 24; h++) {
+      var btn = document.createElement('button');
+      btn.className = 'time-chip';
+      btn.dataset.hour = h;
+      btn.textContent = (h < 10 ? '0' : '') + h + '시';
+      row.appendChild(btn);
+    }
+
+    /* 뱃지 클릭 선택 */
+    row.addEventListener('click', function (e) {
+      if (isDraggingChips) return; /* 드래그 중엔 선택 막기 */
+      var chip = e.target.closest('.time-chip');
+      if (!chip) return;
+      calTempHour = parseInt(chip.dataset.hour);
+      updateTimeChipsUI();
+      updateCalSummary();
+    });
+
+    /* 마우스 드래그 스크롤 */
+    var startX, scrollLeft;
+    var isDraggingChips = false;
+
+    row.addEventListener('mousedown', function (e) {
+      isDraggingChips = false;
+      startX     = e.pageX - row.offsetLeft;
+      scrollLeft = row.scrollLeft;
+      row.style.cursor = 'grabbing';
+    });
+    row.addEventListener('mousemove', function (e) {
+      if (e.buttons !== 1) return;
+      var dx = e.pageX - row.offsetLeft - startX;
+      if (Math.abs(dx) > 4) isDraggingChips = true;
+      if (isDraggingChips) { e.preventDefault(); row.scrollLeft = scrollLeft - dx; }
+    });
+    document.addEventListener('mouseup', function () {
+      row.style.cursor = 'grab';
+      setTimeout(function () { isDraggingChips = false; }, 0);
+    });
+  }
+
+  function updateTimeChipsUI() {
+    document.querySelectorAll('#time-chip-row .time-chip').forEach(function (chip) {
+      chip.classList.toggle('sel', parseInt(chip.dataset.hour) === calTempHour);
+    });
+    var sel = document.querySelector('#time-chip-row .time-chip.sel');
+    if (sel) sel.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  }
+
+  /* ════════════════════════════════════════
+     공유 오버레이 관리
+  ════════════════════════════════════════ */
+  function openOverlay()  { document.getElementById('sheet-overlay').classList.add('open'); }
+  function closeOverlay() { document.getElementById('sheet-overlay').classList.remove('open'); }
+
+  /* ════════════════════════════════════════
+     이벤트 - 출도착지 시트
+  ════════════════════════════════════════ */
+  document.addEventListener('click', function (e) {
+    /* 돋보기 아이콘 또는 출도착 문구 클릭 */
+    if (e.target.closest('.route-center') || e.target.closest('.search-icon')) {
+      openRouteSheet(); return;
+    }
+    /* 닫기 */
+    if (e.target.closest('#rs-close-btn') || e.target.closest('#rs-picker-close')) {
+      closeRouteSheet(); return;
+    }
+    /* 뒤로 */
+    if (e.target.closest('#rs-picker-back')) {
+      showRouteMain(); return;
+    }
+    /* 편도 / 왕복 탭 */
+    if (e.target.id === 'trip-oneway') { routeTempTripType = 'oneway';    renderRouteMain(); return; }
+    if (e.target.id === 'trip-round')  { routeTempTripType = 'roundtrip'; renderRouteMain(); return; }
+    /* 역 선택 버튼 */
+    if (e.target.closest('#rs-dep-btn')) { openStationPicker('dep'); return; }
+    if (e.target.closest('#rs-arr-btn')) { openStationPicker('arr'); return; }
+    /* 교환 버튼 */
+    if (e.target.closest('#rs-swap-btn')) {
+      var tmp = { name: routeTempDep.name, code: routeTempDep.code };
+      routeTempDep = { name: routeTempArr.name, code: routeTempArr.code };
+      routeTempArr = tmp;
+      renderRouteMain(); return;
+    }
+    /* 검색하기 */
+    if (e.target.closest('#rs-apply-btn')) {
+      appliedDep      = { name: routeTempDep.name, code: routeTempDep.code };
+      appliedArr      = { name: routeTempArr.name, code: routeTempArr.code };
+      appliedTripType = routeTempTripType;
+      renderTopBar();
+      closeRouteSheet(); return;
+    }
+  });
+
+  /* ════════════════════════════════════════
+     이벤트 - 날짜 시트
+  ════════════════════════════════════════ */
+  document.addEventListener('click', function (e) {
+    /* 달력 아이콘 또는 날짜 텍스트 클릭 → TopBar onclick이 먼저 처리하므로 보조만 */
+    if (e.target.closest('.date-current')) { openDateSheet(); return; }
+    /* 새로고침 → 오늘 날짜에 가장 가까운 DATES로 이동 */
+    if (e.target.closest('.refresh-btn')) {
+      var todayFmt = (TODAY.getMonth()+1 < 10 ? '0' : '') + (TODAY.getMonth()+1) + '.' +
+                     (TODAY.getDate() < 10 ? '0' : '') + TODAY.getDate() + '(' + CAL_DAYS[TODAY.getDay()] + ')';
+      var idx = DATES.indexOf(todayFmt);
+      if (idx >= 0) { changeDate(idx); }
+      calAppliedHour = 6; return;
+    }
+    /* 날짜 시트 닫기 */
+    if (e.target.closest('#ds-close-btn')) { closeDateSheet(); return; }
+    /* 이전/다음 달 */
+    if (e.target.closest('#cal-prev-mo')) {
+      calViewMonth--;
+      if (calViewMonth < 0) { calViewMonth = 11; calViewYear--; }
+      renderCalSheet(); return;
+    }
+    if (e.target.closest('#cal-next-mo')) {
+      calViewMonth++;
+      if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
+      renderCalSheet(); return;
+    }
+    /* 변경하기 */
+    if (e.target.closest('#ds-apply-btn')) {
+      calAppliedHour = calTempHour;
+      if (calTempDate) {
+        var m2 = (calTempDate.getMonth()+1 < 10 ? '0' : '') + (calTempDate.getMonth()+1);
+        var d2 = (calTempDate.getDate() < 10 ? '0' : '') + calTempDate.getDate();
+        var fmt = m2 + '.' + d2 + '(' + CAL_DAYS[calTempDate.getDay()] + ')';
+        var fi  = DATES.indexOf(fmt);
+        if (fi >= 0) { changeDate(fi); }
+      }
+      closeDateSheet(); return;
+    }
+  });
+
+  /* ── 매진카드 펼침/접힘 토글 ── */
+  var ARROW_DOWN = '<svg width="20" height="20" viewBox="0 0 24 24" fill="#8e8e8e"><path d="M7 10l5 5 5-5z"/></svg>';
+  var ARROW_UP   = '<svg width="20" height="20" viewBox="0 0 24 24" fill="#8e8e8e"><path d="M7 14l5-5 5 5z"/></svg>';
+
+  document.addEventListener('click', function (e) {
+    var header = e.target.closest('.collapsed-toggle');
+    if (!header) return;
+    var card = header.closest('.soldout-card');
+    if (!card) return;
+
+    var body      = card.querySelector('.soldout-body');
+    var footer    = card.querySelector('.soldout-footer');
+    var icon      = header.querySelector('.toggle-icon');
+    var timeLabel = header.querySelector('.header-time');
+
+    if (!body) return;
+    var isCollapsed = body.style.display === 'none';
+
+    if (isCollapsed) {
+      /* 접힘 → 펼침 */
+      body.style.display   = '';
+      footer.style.display = '';
+      if (timeLabel) timeLabel.style.display = 'none'; /* 펼쳐지면 헤더 시간 숨김 */
+      icon.innerHTML = ARROW_UP;
+    } else {
+      /* 펼침 → 접힘 */
+      body.style.display   = 'none';
+      footer.style.display = 'none';
+      if (timeLabel) timeLabel.style.display = ''; /* 접히면 헤더 시간 노출 */
+      icon.innerHTML = ARROW_DOWN;
+    }
+  });
+</script>
+<!-- ── 바텀시트 오버레이 ── -->
+<div class="sheet-overlay" id="sheet-overlay"></div>
+
+<!-- ══════════════════════════════
+     열차 정렬 바텀시트
+══════════════════════════════ -->
+<div class="change-sheet" id="sort-sheet">
+  <div class="cs-header" style="border-bottom:1px solid #dbdbdb;">
+    <span class="cs-title">열차 정렬</span>
+    <button class="cs-close" id="sort-close-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0f0f0f" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div id="sort-options-list">
+    <div class="sort-option" data-sort="빠른시간순">
+      <div class="sort-opt-check">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="sort-opt-text">빠른시간순</span>
+    </div>
+    <div class="sort-option" data-sort="느린시간순">
+      <div class="sort-opt-check">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="sort-opt-text">느린시간순</span>
+    </div>
+    <div class="sort-option" data-sort="최단소요순">
+      <div class="sort-opt-check">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="sort-opt-text">최단소요순</span>
+    </div>
+    <div class="sort-option" data-sort="최저가순">
+      <div class="sort-opt-check">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="sort-opt-text">최저가순</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     출도착지 변경 바텀시트
+══════════════════════════════ -->
+<div class="change-sheet" id="route-sheet">
+
+  <!-- [뷰 1] 재검색 메인 -->
+  <div id="route-sheet-main">
+    <div class="cs-header">
+      <span class="cs-title">재검색</span>
+      <button class="cs-close" id="rs-close-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0f0f0f" stroke-width="2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- 편도 / 왕복 탭 -->
+    <div class="trip-tabs">
+      <button class="trip-tab active" id="trip-oneway">편도</button>
+      <button class="trip-tab"        id="trip-round">왕복</button>
+    </div>
+
+    <!-- 역 표시 -->
+    <div class="stn-row">
+      <button class="stn-pick-btn" id="rs-dep-btn">
+        <span class="stn-name" id="rs-dep-name">서울</span>
+        <span class="stn-code" id="rs-dep-code">SEL</span>
+      </button>
+
+      <button class="stn-swap-btn" id="rs-swap-btn" title="출발/도착 교환">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="14" fill="white" stroke="#e0e0e0" stroke-width="1.5"/>
+          <path d="M18 20h12M27.5 17l3 3-3 3" stroke="#3a66af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M30 28H18M20.5 31l-3-3 3-3" stroke="#3a66af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <button class="stn-pick-btn" id="rs-arr-btn">
+        <span class="stn-name" id="rs-arr-name">부산</span>
+        <span class="stn-code" id="rs-arr-code">BUS</span>
+      </button>
+    </div>
+
+    <!-- 요약 -->
+    <p class="cs-summary" id="route-cs-summary">
+      <span class="cs-blue">서울 → 부산 </span><span class="cs-black">탑승객 1명</span>
+    </p>
+
+    <button class="cs-action-btn" id="rs-apply-btn">검색하기</button>
+  </div>
+
+  <!-- [뷰 2] 역 선택 -->
+  <div id="route-sheet-picker" style="display:none">
+    <div class="cs-header">
+      <div class="cs-header-left">
+        <button class="cs-back-btn" id="rs-picker-back">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0f0f0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <span class="cs-title" id="rs-picker-title">출발역 선택</span>
+      </div>
+      <button class="cs-close" id="rs-picker-close">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0f0f0f" stroke-width="2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <ul class="stn-pick-list" id="rs-station-list"></ul>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════
+     날짜 변경 바텀시트
+══════════════════════════════ -->
+<div class="change-sheet" id="date-sheet">
+
+  <div class="cs-header">
+    <span class="cs-title">가는날</span>
+    <button class="cs-close" id="ds-close-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0f0f0f" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- 월 네비게이션 -->
+  <div class="cal-month-nav">
+    <span class="cal-month-label" id="cal-month-lbl"></span>
+    <div class="cal-nav-arrows">
+      <button class="cal-nav-btn" id="cal-prev-mo">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <button class="cal-nav-btn" id="cal-next-mo">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 달력 -->
+  <div class="cal-body">
+    <div class="cal-weekdays">
+      <div class="cal-weekday">일</div><div class="cal-weekday">월</div>
+      <div class="cal-weekday">화</div><div class="cal-weekday">수</div>
+      <div class="cal-weekday">목</div><div class="cal-weekday">금</div>
+      <div class="cal-weekday">토</div>
+    </div>
+    <div class="cal-grid" id="cal-grid-cs"></div>
+  </div>
+
+  <!-- 시간 선택 뱃지 -->
+  <div class="time-divider"></div>
+  <div class="time-section-wrap">
+    <span class="time-lbl">시간</span>
+    <div class="time-chip-row" id="time-chip-row"></div>
+  </div>
+
+  <!-- 요약 -->
+  <p class="date-cs-summary" id="cal-date-summary"></p>
+
+  <button class="cs-action-btn" id="ds-apply-btn">변경하기</button>
+
+</div>
+
+<!-- ── 열차비교 바텀시트 ── -->
+<div class="compare-sheet" id="compare-sheet">
+  <div class="compare-sheet-header">
+    <span class="compare-sheet-title">열차 비교하기</span>
+    <button class="compare-sheet-close" id="compare-sheet-close">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div class="compare-sheet-cards" id="compare-sheet-cards"></div>
+</div>
+
+</body>
+</html>

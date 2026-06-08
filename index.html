@@ -439,6 +439,296 @@
       font-size: 16px;
       font-weight: 700;
       color: #3a66af;
+      background: none; border: none; padding: 0;
+      cursor: pointer; font-family: inherit; text-align: left;
+      display: block;
+    }
+
+    /* ── 예약 바텀시트 ── */
+    .booking-sheet {
+      position: fixed; bottom: 0; left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      width: 402px; background: white;
+      border-radius: 16px 16px 0 0;
+      z-index: 302;
+      display: flex; flex-direction: column;
+      transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.15);
+    }
+    .booking-sheet.open { transform: translateX(-50%) translateY(0); }
+    .bs-handle-wrap { display: flex; justify-content: center; padding: 10px 0 4px; flex-shrink: 0; }
+    .bs-handle { width: 36px; height: 4px; background: #e0e0e0; border-radius: 2px; }
+    .bs-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 4px 6px 8px 20px; flex-shrink: 0;
+    }
+    .bs-title { font-size: 17px; font-weight: 700; color: #0f0f0f; letter-spacing: -0.3px; }
+    .bs-close {
+      width: 48px; height: 48px; background: none; border: none;
+      cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .bs-body { flex: 1; overflow-y: auto; padding: 0 20px 4px; }
+    .bs-train-info { padding: 2px 0 14px; }
+    .bs-train-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .bs-train-logo { display: flex; align-items: center; flex-shrink: 0; }
+    .bs-train-num-text { font-size: 13px; color: #666; }
+    .bs-route-row { display: flex; align-items: center; gap: 8px; }
+    .bs-time-text { font-size: 22px; font-weight: 700; color: #0f0f0f; letter-spacing: -0.5px; }
+    .bs-arrow-icon { color: #aaa; font-size: 14px; flex-shrink: 0; }
+    .bs-station-text { font-size: 13px; color: #888; }
+    .bs-duration-text { font-size: 12px; color: #aaa; margin-left: auto; }
+    .bs-divider { height: 1px; background: #f0f0f0; }
+    /* 좌석 행 (기본 정보 내부) */
+    .bs-seat-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 12px;
+    }
+    .bs-seat-row-left { display: flex; align-items: center; gap: 8px; }
+    .bs-seat-label-text { font-size: 12px; color: #888; flex-shrink: 0; }
+    .bs-seat-value { font-size: 15px; font-weight: 700; color: #3a66af; letter-spacing: -0.3px; }
+    .bs-seat-change-btn {
+      font-size: 12px; font-weight: 500; color: #3a66af;
+      background: none; border: 1px solid #3a66af;
+      padding: 4px 10px; border-radius: 12px; cursor: pointer; font-family: inherit;
+    }
+    .bs-footer { display: flex; gap: 8px; padding: 14px 20px 28px; flex-shrink: 0; }
+    .bs-change-btn {
+      flex: 1; height: 50px;
+      border: 1px solid #3a66af; background: transparent; color: #3a66af;
+      font-size: 14px; font-weight: 600; border-radius: 6px;
+      cursor: pointer; font-family: inherit; transition: opacity 0.15s;
+    }
+    .bs-change-btn:hover { opacity: 0.75; }
+    .bs-book-btn {
+      flex: 2; height: 50px;
+      background: #3a66af; color: white; border: none;
+      font-size: 15px; font-weight: 600; border-radius: 6px;
+      cursor: pointer; font-family: inherit; transition: opacity 0.15s;
+    }
+    .bs-book-btn:hover { opacity: 0.85; }
+
+    /* ── 좌석 도면 시트 ── */
+    .sm-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      z-index: 350; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .sm-overlay.open { opacity: 1; pointer-events: auto; }
+    .sm-sheet {
+      position: fixed; bottom: 0; left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      width: 402px; height: 82vh;
+      background: white; border-radius: 16px 16px 0 0;
+      z-index: 351; display: flex; flex-direction: column;
+      transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+    }
+    .sm-sheet.open { transform: translateX(-50%) translateY(0); }
+    .sm-handle-wrap { display: flex; justify-content: center; padding: 10px 0 4px; flex-shrink: 0; }
+    .sm-handle { width: 36px; height: 4px; background: #e0e0e0; border-radius: 2px; }
+    .sm-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 6px 8px 20px; flex-shrink: 0;
+    }
+    .sm-title { font-size: 17px; font-weight: 700; color: #0f0f0f; letter-spacing: -0.3px; }
+    .sm-close-btn {
+      width: 48px; height: 48px; background: none; border: none;
+      cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;
+    }
+    /* 호차 선택 */
+    .sm-car-wrap {
+      padding: 0 16px 10px; flex-shrink: 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .sm-car-label { font-size: 11px; color: #888; margin-bottom: 6px; }
+    .sm-car-scroll {
+      display: flex; gap: 6px; overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .sm-car-scroll::-webkit-scrollbar { display: none; }
+    .sm-car-btn {
+      flex-shrink: 0; height: 30px; padding: 0 12px;
+      border: 1.5px solid #e0eaf8; border-radius: 15px;
+      background: white; font-size: 12px; font-weight: 500; color: #555;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .sm-car-btn.active {
+      background: #3a66af; border-color: #3a66af; color: white; font-weight: 700;
+    }
+    /* 범례 */
+    .sm-legend {
+      display: flex; align-items: center; gap: 14px; justify-content: flex-end;
+      padding: 8px 20px; flex-shrink: 0;
+    }
+    .sm-legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #888; }
+    .sm-legend-box {
+      width: 14px; height: 14px; border-radius: 3px;
+    }
+    .sm-legend-box.avail { background: white; border: 1.5px solid #c8d9f5; }
+    .sm-legend-box.taken { background: #e8e8e8; border: 1.5px solid #e0e0e0; }
+    .sm-legend-box.sel   { background: #3a66af; border: 1.5px solid #3a66af; }
+    /* 도면 스크롤 영역 */
+    .sm-body { flex: 1; overflow-y: auto; padding: 8px 16px 8px; }
+    /* 열 헤더 */
+    .sm-col-header {
+      display: grid; grid-template-columns: 22px 1fr 1fr 14px 1fr 1fr;
+      gap: 4px; margin-bottom: 6px; padding: 0 2px;
+    }
+    .sm-col-lbl {
+      text-align: center; font-size: 11px; font-weight: 700; color: #3a66af;
+    }
+    /* 각 행 */
+    .sm-row {
+      display: grid; grid-template-columns: 22px 1fr 1fr 14px 1fr 1fr;
+      gap: 4px; margin-bottom: 4px;
+    }
+    .sm-row-num {
+      text-align: center; font-size: 10px; color: #bbb;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sm-seat {
+      height: 38px; border: 1.5px solid #c8d9f5; border-radius: 6px;
+      background: white; cursor: pointer; font-family: inherit;
+      font-size: 11px; font-weight: 600; color: #555;
+      transition: all 0.15s; position: relative;
+    }
+    .sm-seat::after {
+      content: ''; position: absolute; bottom: 3px; left: 50%;
+      transform: translateX(-50%);
+      width: 55%; height: 3px; background: #e0eaf8; border-radius: 2px;
+    }
+    .sm-seat.taken {
+      background: #efefef; border-color: #e0e0e0; color: #ccc; cursor: not-allowed;
+    }
+    .sm-seat.taken::after { background: #e0e0e0; }
+    .sm-seat.chosen {
+      background: #3a66af; border-color: #2d57a0; color: white;
+    }
+    .sm-seat.chosen::after { background: rgba(255,255,255,0.35); }
+    .sm-aisle { /* spacer */ }
+    /* 확인 버튼 */
+    .sm-footer { padding: 10px 16px 28px; flex-shrink: 0; }
+    .sm-confirm-btn {
+      display: block; width: 100%; height: 50px;
+      background: #3a66af; color: white; border: none;
+      font-size: 16px; font-weight: 600; border-radius: 8px;
+      cursor: pointer; font-family: inherit; transition: opacity 0.15s;
+    }
+    .sm-confirm-btn:hover { opacity: 0.85; }
+    /* 결제완료 페이지 결제내역 버튼 */
+    .pp-receipt-btn {
+      display: block; width: 100%; height: 50px;
+      border: none; background: #3a66af; color: white;
+      font-size: 15px; font-weight: 600; border-radius: 8px;
+      cursor: pointer; font-family: inherit; transition: opacity 0.15s; margin-top: 14px;
+    }
+    .pp-receipt-btn:hover { opacity: 0.85; }
+    @media (max-width: 402px) {
+      .sm-sheet { left: 0; transform: translateY(100%); width: 100%; }
+      .sm-sheet.open { transform: translateY(0); }
+    }
+
+    /* ── 결제 완료 페이지 ── */
+    .payment-page {
+      position: fixed;
+      top: 0; bottom: 0; left: 0; right: 0;
+      width: 402px; margin: 0 auto;
+      background: #f5f5f5;
+      z-index: 400;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      transform: translateX(100vw);
+      transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .payment-page.open { transform: translateX(0); }
+    /* 상단 헤더 */
+    .pp-header {
+      width: 100%; height: 56px; flex-shrink: 0;
+      background: white;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 4px;
+    }
+    .pp-header-btn {
+      width: 48px; height: 48px;
+      background: none; border: none; cursor: pointer; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .pp-header-title {
+      font-size: 17px; font-weight: 600; color: #0f0f0f; letter-spacing: -0.3px;
+    }
+    /* 본문 스크롤 영역 */
+    .pp-body {
+      flex: 1; overflow-y: auto;
+      padding: 24px 16px 40px;
+      display: flex; flex-direction: column; align-items: center; gap: 20px;
+    }
+    .receipt {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+      width: 100%;
+    .receipt-perf-top {
+      height: 18px; border-radius: 12px 12px 0 0;
+      background: radial-gradient(circle at 50% 0%, rgba(0,0,0,0) 8px, white 8px) -9px 0 / 18px 18px;
+    }
+    .receipt-inner { padding: 4px 20px 20px; }
+    .receipt-head {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 6px 0 16px; border-bottom: 1.5px dashed #d6cdb6;
+    }
+    .receipt-check-icon {
+      width: 42px; height: 42px; background: #3a66af; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+    }
+    .receipt-head-title { font-size: 16px; font-weight: 700; color: #1a1a1a; letter-spacing: -0.3px; }
+    .receipt-booking-id { font-size: 11px; color: #aaa; margin-top: 4px; letter-spacing: 0.3px; }
+    .receipt-section { padding: 13px 0; border-bottom: 1.5px dashed #d6cdb6; }
+    .receipt-route-row {
+      display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;
+    }
+    .rc-station { font-size: 18px; font-weight: 700; color: #1a1a1a; }
+    .rc-arrow { font-size: 13px; color: #aaa; }
+    .receipt-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .receipt-row:last-child { margin-bottom: 0; }
+    .receipt-label { font-size: 12px; color: #aaa; }
+    .receipt-value { font-size: 13px; color: #1a1a1a; font-weight: 500; }
+    .receipt-seat-value { font-size: 15px; font-weight: 700; color: #3a66af; letter-spacing: -0.3px; }
+    .receipt-qr-area {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 14px 0 10px; border-bottom: 1.5px dashed #d6cdb6;
+    }
+    .receipt-qr-box {
+      width: 96px; height: 96px;
+      border: 1.5px solid #d6cdb6; border-radius: 8px; background: white; padding: 7px;
+    }
+    .receipt-qr-box svg { display: block; width: 100%; height: 100%; }
+    .receipt-qr-label { font-size: 10px; color: #aaa; margin-top: 6px; }
+    .receipt-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 0 4px;
+    }
+    .receipt-total-label { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+    .receipt-total-amount { font-size: 22px; font-weight: 700; color: #3a66af; letter-spacing: -0.5px; }
+    .receipt-perf-bottom {
+      height: 18px; border-radius: 0 0 12px 12px;
+      background: radial-gradient(circle at 50% 100%, rgba(0,0,0,0) 8px, white 8px) -9px 0 / 18px 18px;
+    }
+    /* 홈으로 버튼 */
+    .pp-home-action-btn {
+      display: block; width: 100%; height: 52px;
+      background: #3a66af; color: white; border: none;
+      font-size: 16px; font-weight: 600; border-radius: 8px;
+      cursor: pointer; font-family: inherit; transition: opacity 0.15s;
+    }
+    .pp-home-action-btn:hover { opacity: 0.85; }
+    @media (max-width: 402px) {
+      .booking-sheet { left: 0; transform: translateY(100%); width: 100%; }
+      .booking-sheet.open { transform: translateY(0); }
+      .payment-page { width: 100%; }
     }
 
 
@@ -1464,6 +1754,222 @@
       icon.innerHTML = ARROW_DOWN;
     }
   });
+
+  /* ══════════════════════════════
+     예약 바텀시트 + 좌석 도면
+  ══════════════════════════════ */
+  var _bsTrain     = null;
+  var _bsSeatLabel = '';
+  var _bsPrice     = '';
+  var _smCurCar    = 1;
+  var _smSelected  = null; /* {carNum, row, col} */
+
+  function getTrainLogo(type) {
+    switch (type) {
+      case 'KTX':        return Icons.ktxLogo('');
+      case 'SRT':        return Icons.srtLogo('');
+      case '무궁화':     return Icons.mugunghwaLogo('');
+      case '새마을':     return Icons.saemaeulLogo('');
+      case 'ITX-청춘':   return Icons.itxLogo('');
+      case 'ITX-새마을': return Icons.itxSaemaeulLogo('');
+      case 'KTX-산천':   return Icons.ktxSancheonLogo('');
+      case '누리로':     return Icons.nuriroLogo('');
+      default: return '<span style="font-size:12px;font-weight:700;color:#3a66af">'+type+'</span>';
+    }
+  }
+
+  /* 결정론적 점유 여부 (열차번호 + 호차 + 좌석 기반) */
+  function isTaken(trainNum, carNum, row, col) {
+    var h = 0;
+    for (var i=0; i<trainNum.length; i++) h += trainNum.charCodeAt(i);
+    h = (h * 31 + carNum * 17 + row * 7 + col.charCodeAt(0) * 3) % 10;
+    return h < 3; /* 약 30% 점유 */
+  }
+
+  function renderSeatRows(trainNum, carNum) {
+    var rows = 20;
+    var cols = ['A','B','C','D'];
+    var html = '';
+    for (var r=1; r<=rows; r++) {
+      html += '<div class="sm-row" data-row="'+r+'">';
+      html += '<div class="sm-row-num">'+r+'</div>';
+      /* A, B */
+      ['A','B'].forEach(function(col) {
+        var taken = isTaken(trainNum, carNum, r, col);
+        var isSel = _smSelected && _smSelected.carNum===carNum && _smSelected.row===r && _smSelected.col===col;
+        var cls = taken ? 'taken' : (isSel ? 'chosen' : '');
+        html += '<button class="sm-seat '+cls+'" '+(taken?'disabled':'')+' data-row="'+r+'" data-col="'+col+'" data-car="'+carNum+'">'+col+'</button>';
+      });
+      html += '<div class="sm-aisle"></div>';
+      /* C, D */
+      ['C','D'].forEach(function(col) {
+        var taken = isTaken(trainNum, carNum, r, col);
+        var isSel = _smSelected && _smSelected.carNum===carNum && _smSelected.row===r && _smSelected.col===col;
+        var cls = taken ? 'taken' : (isSel ? 'chosen' : '');
+        html += '<button class="sm-seat '+cls+'" '+(taken?'disabled':'')+' data-row="'+r+'" data-col="'+col+'" data-car="'+carNum+'">'+col+'</button>';
+      });
+      html += '</div>';
+    }
+    return html;
+  }
+
+  function openBookingSheet(trainNumber, seatIdx) {
+    var sheet = document.getElementById('booking-sheet');
+    var overlay = document.getElementById('sheet-overlay');
+    if (!sheet) return;
+    var allTrains = TRAIN_DATA_BY_DATE[DATES[curIdx]] || [];
+    var train = null;
+    for (var i=0; i<allTrains.length; i++) {
+      if (allTrains[i].trainNumber===trainNumber) { train=allTrains[i]; break; }
+    }
+    if (!train) return;
+    _bsTrain = train;
+    var seat = (train.seats||[])[seatIdx] || train.seats[0];
+    _bsSeatLabel = seat ? (seat.label||'일반실') : '일반실';
+    _bsPrice     = seat ? (seat.price||'') : '';
+    _smSelected  = null;
+
+    document.getElementById('bs-train-logo').innerHTML  = getTrainLogo(train.trainType);
+    document.getElementById('bs-train-num').textContent = train.trainNumber+'호';
+    document.getElementById('bs-depart').textContent    = train.departTime;
+    document.getElementById('bs-arrive').textContent    = train.arriveTime;
+    document.getElementById('bs-from').textContent      = train.from;
+    document.getElementById('bs-to').textContent        = train.to;
+    document.getElementById('bs-duration').textContent  = train.duration;
+    document.getElementById('bs-seat-display').textContent = '좌석을 선택해주세요';
+
+    sheet.classList.add('open');
+    overlay.classList.add('open');
+  }
+
+  function closeBookingSheet() {
+    var sheet = document.getElementById('booking-sheet');
+    var overlay = document.getElementById('sheet-overlay');
+    if (!sheet) return;
+    sheet.classList.remove('open');
+    if (!document.querySelector('.compare-sheet.open,.change-sheet.open') && overlay)
+      overlay.classList.remove('open');
+  }
+
+  /* 좌석 도면 열기 */
+  function openSeatMap() {
+    if (!_bsTrain) return;
+    var isSpecial = _bsSeatLabel.indexOf('특실') >= 0;
+    var cars = isSpecial ? [1,2,3] : [4,5,6,7,8];
+    _smCurCar = cars[0];
+
+    /* 호차 버튼 생성 */
+    document.getElementById('sm-car-scroll').innerHTML = cars.map(function(c) {
+      return '<button class="sm-car-btn'+(c===_smCurCar?' active':'')+'" data-car="'+c+'">'+c+'호차</button>';
+    }).join('');
+
+    /* 도면 렌더 */
+    document.getElementById('sm-seat-rows').innerHTML = renderSeatRows(_bsTrain.trainNumber, _smCurCar);
+
+    document.getElementById('sm-overlay').classList.add('open');
+    document.getElementById('sm-sheet').classList.add('open');
+  }
+
+  function closeSeatMap() {
+    document.getElementById('sm-overlay').classList.remove('open');
+    document.getElementById('sm-sheet').classList.remove('open');
+  }
+
+  /* 결제 완료 페이지 열기 */
+  function openPaymentPage() {
+    if (!_bsTrain) return;
+    var seatText = document.getElementById('bs-seat-display').textContent;
+    var date = DATES[curIdx]||'';
+    document.getElementById('rc-train').textContent  = _bsTrain.trainType+' '+_bsTrain.trainNumber+'호';
+    document.getElementById('rc-from').textContent   = _bsTrain.from;
+    document.getElementById('rc-to').textContent     = _bsTrain.to;
+    document.getElementById('rc-depart').textContent = date+' '+_bsTrain.departTime;
+    document.getElementById('rc-arrive').textContent = date+' '+_bsTrain.arriveTime;
+    document.getElementById('rc-seat').textContent   = seatText+' ('+_bsSeatLabel+')';
+    document.getElementById('rc-price').textContent  = _bsPrice;
+    document.getElementById('rc-id').textContent     = '예약번호 K'+Date.now().toString().slice(-8);
+    document.getElementById('payment-page').classList.add('open');
+  }
+
+  function closePaymentPage() {
+    document.getElementById('payment-page').classList.remove('open');
+  }
+
+  /* ── 이벤트 ── */
+
+  /* 가격 버튼 */
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-price-btn]');
+    if (!btn) return;
+    e.stopPropagation();
+    openBookingSheet(btn.getAttribute('data-train-number'), parseInt(btn.getAttribute('data-seat-idx')||'0',10));
+  });
+
+  /* 오버레이 클릭 → 예약 시트 닫기 */
+  document.addEventListener('click', function(e){
+    if (e.target.id === 'sheet-overlay') closeBookingSheet();
+  });
+
+  /* 예약 시트 닫기(X) / 변경하기 */
+  document.addEventListener('click', function(e){
+    if (e.target.closest('#bs-close-btn') || e.target.closest('#bs-change-btn')) closeBookingSheet();
+  });
+
+  /* 좌석변경하기 → 도면 시트 열기 */
+  document.addEventListener('click', function(e){
+    if (e.target.closest('#bs-seat-change-btn')) openSeatMap();
+  });
+
+  /* 호차 선택 */
+  document.addEventListener('click', function(e){
+    var carBtn = e.target.closest('.sm-car-btn');
+    if (!carBtn || !carBtn.closest('#sm-sheet')) return;
+    _smCurCar = parseInt(carBtn.getAttribute('data-car'));
+    document.querySelectorAll('#sm-car-scroll .sm-car-btn').forEach(function(b){
+      b.classList.toggle('active', parseInt(b.getAttribute('data-car'))===_smCurCar);
+    });
+    document.getElementById('sm-seat-rows').innerHTML = renderSeatRows(_bsTrain.trainNumber, _smCurCar);
+  });
+
+  /* 좌석 선택 */
+  document.addEventListener('click', function(e){
+    var seat = e.target.closest('.sm-seat');
+    if (!seat || seat.disabled || !seat.closest('#sm-sheet')) return;
+    _smSelected = { carNum: parseInt(seat.getAttribute('data-car')), row: parseInt(seat.getAttribute('data-row')), col: seat.getAttribute('data-col') };
+    document.getElementById('sm-seat-rows').innerHTML = renderSeatRows(_bsTrain.trainNumber, _smCurCar);
+  });
+
+  /* 도면 닫기(X) / 오버레이 */
+  document.addEventListener('click', function(e){
+    if (e.target.closest('#sm-close-btn') || e.target.id==='sm-overlay') closeSeatMap();
+  });
+
+  /* 선택 완료 */
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('#sm-confirm-btn')) return;
+    if (_smSelected) {
+      var label = _smSelected.carNum+'호차 '+_smSelected.row+_smSelected.col;
+      document.getElementById('bs-seat-display').textContent = label;
+    }
+    closeSeatMap();
+  });
+
+  /* 결제하기 */
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('#bs-book-btn')) return;
+    closeBookingSheet();
+    setTimeout(openPaymentPage, 350);
+  });
+
+  /* 결제완료 헤더 버튼 → 홈 */
+  document.addEventListener('click', function(e){
+    if (e.target.closest('#pp-home-btn') || e.target.closest('#pp-menu-btn')) closePaymentPage();
+  });
+
+  /* 결제내역 확인하기 (결제완료 페이지) */
+  document.addEventListener('click', function(e){
+    if (e.target.closest('#pp-receipt-btn')) closePaymentPage();
+  });
 </script>
 <!-- ── 바텀시트 오버레이 ── -->
 <div class="sheet-overlay" id="sheet-overlay"></div>
@@ -1634,6 +2140,290 @@
   <p class="date-cs-summary" id="cal-date-summary"></p>
 
   <button class="cs-action-btn" id="ds-apply-btn">변경하기</button>
+
+</div>
+
+<!-- ── 예약 바텀시트 ── -->
+<div class="booking-sheet" id="booking-sheet">
+  <div class="bs-handle-wrap"><div class="bs-handle"></div></div>
+  <div class="bs-header">
+    <span class="bs-title">예약 확인</span>
+    <button class="bs-close" id="bs-close-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.8" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div class="bs-body">
+    <div class="bs-train-info">
+      <!-- 로고 + 번호 -->
+      <div class="bs-train-top">
+        <div class="bs-train-logo" id="bs-train-logo"></div>
+        <span class="bs-train-num-text" id="bs-train-num"></span>
+      </div>
+      <!-- 시간 + 구간 -->
+      <div class="bs-route-row">
+        <span class="bs-time-text" id="bs-depart"></span>
+        <span class="bs-station-text" id="bs-from"></span>
+        <span class="bs-arrow-icon">→</span>
+        <span class="bs-time-text" id="bs-arrive"></span>
+        <span class="bs-station-text" id="bs-to"></span>
+        <span class="bs-duration-text" id="bs-duration"></span>
+      </div>
+      <div class="bs-divider" style="margin-top:12px;"></div>
+      <!-- 좌석 행 -->
+      <div class="bs-seat-row">
+        <div class="bs-seat-row-left">
+          <span class="bs-seat-label-text">좌석</span>
+          <span class="bs-seat-value" id="bs-seat-display">—</span>
+        </div>
+        <button class="bs-seat-change-btn" id="bs-seat-change-btn">좌석변경하기</button>
+      </div>
+    </div>
+  </div>
+  <div class="bs-footer">
+    <button class="bs-change-btn" id="bs-change-btn">변경하기</button>
+    <button class="bs-book-btn" id="bs-book-btn">결제하기</button>
+  </div>
+</div>
+
+<!-- ── 좌석 도면 시트 ── -->
+<div class="sm-overlay" id="sm-overlay"></div>
+<div class="sm-sheet" id="sm-sheet">
+  <div class="sm-handle-wrap"><div class="sm-handle"></div></div>
+  <div class="sm-header">
+    <span class="sm-title">좌석 선택</span>
+    <button class="sm-close-btn" id="sm-close-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.8" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div class="sm-car-wrap">
+    <div class="sm-car-label">호차 선택</div>
+    <div class="sm-car-scroll" id="sm-car-scroll"></div>
+  </div>
+  <div class="sm-legend">
+    <div class="sm-legend-item"><div class="sm-legend-box avail"></div>선택가능</div>
+    <div class="sm-legend-item"><div class="sm-legend-box taken"></div>선택불가</div>
+    <div class="sm-legend-item"><div class="sm-legend-box sel"></div>선택</div>
+  </div>
+  <div class="sm-body" id="sm-body">
+    <div class="sm-col-header">
+      <div></div>
+      <div class="sm-col-lbl">A</div>
+      <div class="sm-col-lbl">B</div>
+      <div></div>
+      <div class="sm-col-lbl">C</div>
+      <div class="sm-col-lbl">D</div>
+    </div>
+    <div id="sm-seat-rows"></div>
+  </div>
+  <div class="sm-footer">
+    <button class="sm-confirm-btn" id="sm-confirm-btn">선택 완료</button>
+  </div>
+</div>
+
+<!-- ── 결제 완료 페이지 ── -->
+<div class="payment-page" id="payment-page">
+
+  <!-- 상단 헤더 -->
+  <div class="pp-header">
+    <button class="pp-header-btn" id="pp-home-btn" title="홈으로">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f0f0f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/>
+        <polyline points="9 21 9 13 15 13 15 21"/>
+      </svg>
+    </button>
+    <span class="pp-header-title">결제 완료</span>
+    <button class="pp-header-btn" id="pp-menu-btn" title="메뉴">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f0f0f" stroke-width="1.8" stroke-linecap="round">
+        <line x1="3" y1="6"  x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- 본문 스크롤 -->
+  <div class="pp-body">
+    <div class="receipt">
+      <div class="receipt-perf-top"></div>
+      <div class="receipt-inner">
+        <div class="receipt-head">
+          <div class="receipt-check-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="receipt-head-title">결제가 완료되었습니다</div>
+          <div class="receipt-booking-id" id="rc-id">예약번호 K00000000</div>
+        </div>
+        <div class="receipt-section">
+          <div class="receipt-route-row">
+            <span class="rc-station" id="rc-from">서울</span>
+            <span class="rc-arrow">→</span>
+            <span class="rc-station" id="rc-to">부산</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">열차</span>
+            <span class="receipt-value" id="rc-train"></span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">출발</span>
+            <span class="receipt-value" id="rc-depart"></span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">도착</span>
+            <span class="receipt-value" id="rc-arrive"></span>
+          </div>
+        </div>
+        <div class="receipt-section">
+          <div class="receipt-row">
+            <span class="receipt-label">좌석</span>
+            <span class="receipt-seat-value" id="rc-seat"></span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">승객</span>
+            <span class="receipt-value">어른 1명</span>
+          </div>
+        </div>
+        <div class="receipt-qr-area">
+          <div class="receipt-qr-box">
+            <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+              <rect width="21" height="21" fill="white"/>
+              <!-- 파인더 패턴 좌상단 -->
+              <rect x="0" y="0" width="7" height="7" fill="#111"/>
+              <rect x="1" y="1" width="5" height="5" fill="white"/>
+              <rect x="2" y="2" width="3" height="3" fill="#111"/>
+              <!-- 파인더 패턴 우상단 -->
+              <rect x="14" y="0" width="7" height="7" fill="#111"/>
+              <rect x="15" y="1" width="5" height="5" fill="white"/>
+              <rect x="16" y="2" width="3" height="3" fill="#111"/>
+              <!-- 파인더 패턴 좌하단 -->
+              <rect x="0" y="14" width="7" height="7" fill="#111"/>
+              <rect x="1" y="15" width="5" height="5" fill="white"/>
+              <rect x="2" y="16" width="3" height="3" fill="#111"/>
+              <!-- 타이밍 패턴 (row6: 8,10,12 / col6: 8,10,12) -->
+              <rect x="8" y="6" width="1" height="1" fill="#111"/>
+              <rect x="10" y="6" width="1" height="1" fill="#111"/>
+              <rect x="12" y="6" width="1" height="1" fill="#111"/>
+              <rect x="6" y="8" width="1" height="1" fill="#111"/>
+              <rect x="6" y="10" width="1" height="1" fill="#111"/>
+              <rect x="6" y="12" width="1" height="1" fill="#111"/>
+              <!-- 고정 다크 모듈 -->
+              <rect x="8" y="13" width="1" height="1" fill="#111"/>
+              <!-- 포맷 정보 영역 -->
+              <rect x="0" y="8" width="1" height="1" fill="#111"/>
+              <rect x="2" y="8" width="2" height="1" fill="#111"/>
+              <rect x="5" y="8" width="1" height="1" fill="#111"/>
+              <rect x="7" y="8" width="1" height="1" fill="#111"/>
+              <rect x="8" y="0" width="1" height="1" fill="#111"/>
+              <rect x="8" y="2" width="1" height="1" fill="#111"/>
+              <rect x="8" y="4" width="1" height="1" fill="#111"/>
+              <rect x="8" y="5" width="1" height="1" fill="#111"/>
+              <rect x="13" y="8" width="2" height="1" fill="#111"/>
+              <rect x="17" y="8" width="1" height="1" fill="#111"/>
+              <rect x="19" y="8" width="2" height="1" fill="#111"/>
+              <rect x="8" y="15" width="1" height="1" fill="#111"/>
+              <rect x="8" y="17" width="1" height="1" fill="#111"/>
+              <rect x="8" y="20" width="1" height="1" fill="#111"/>
+              <!-- 상단 중앙 데이터 (rows 0-5, cols 9-13) -->
+              <rect x="9" y="0" width="2" height="1" fill="#111"/>
+              <rect x="13" y="0" width="1" height="1" fill="#111"/>
+              <rect x="10" y="1" width="1" height="1" fill="#111"/>
+              <rect x="12" y="1" width="1" height="1" fill="#111"/>
+              <rect x="9" y="2" width="1" height="1" fill="#111"/>
+              <rect x="11" y="2" width="2" height="1" fill="#111"/>
+              <rect x="10" y="3" width="1" height="1" fill="#111"/>
+              <rect x="13" y="3" width="1" height="1" fill="#111"/>
+              <rect x="9" y="4" width="1" height="1" fill="#111"/>
+              <rect x="11" y="4" width="1" height="1" fill="#111"/>
+              <rect x="10" y="5" width="2" height="1" fill="#111"/>
+              <rect x="13" y="5" width="1" height="1" fill="#111"/>
+              <!-- 좌측 데이터 (rows 9-13, cols 0-5) -->
+              <rect x="1" y="9" width="2" height="1" fill="#111"/>
+              <rect x="4" y="9" width="1" height="1" fill="#111"/>
+              <rect x="0" y="10" width="1" height="1" fill="#111"/>
+              <rect x="3" y="10" width="2" height="1" fill="#111"/>
+              <rect x="1" y="11" width="1" height="1" fill="#111"/>
+              <rect x="3" y="11" width="1" height="1" fill="#111"/>
+              <rect x="5" y="11" width="1" height="1" fill="#111"/>
+              <rect x="0" y="12" width="2" height="1" fill="#111"/>
+              <rect x="4" y="12" width="2" height="1" fill="#111"/>
+              <rect x="1" y="13" width="3" height="1" fill="#111"/>
+              <!-- 중앙 데이터 (rows 9-13, cols 9-13) -->
+              <rect x="9" y="9" width="2" height="1" fill="#111"/>
+              <rect x="12" y="9" width="2" height="1" fill="#111"/>
+              <rect x="10" y="10" width="1" height="1" fill="#111"/>
+              <rect x="13" y="10" width="1" height="1" fill="#111"/>
+              <rect x="9" y="11" width="1" height="1" fill="#111"/>
+              <rect x="11" y="11" width="2" height="1" fill="#111"/>
+              <rect x="10" y="12" width="2" height="1" fill="#111"/>
+              <rect x="9" y="13" width="1" height="1" fill="#111"/>
+              <rect x="11" y="13" width="1" height="1" fill="#111"/>
+              <rect x="13" y="13" width="1" height="1" fill="#111"/>
+              <!-- 우측 데이터 (rows 9-13, cols 14-20) -->
+              <rect x="14" y="9" width="2" height="1" fill="#111"/>
+              <rect x="18" y="9" width="1" height="1" fill="#111"/>
+              <rect x="20" y="9" width="1" height="1" fill="#111"/>
+              <rect x="15" y="10" width="1" height="1" fill="#111"/>
+              <rect x="17" y="10" width="2" height="1" fill="#111"/>
+              <rect x="14" y="11" width="1" height="1" fill="#111"/>
+              <rect x="16" y="11" width="1" height="1" fill="#111"/>
+              <rect x="19" y="11" width="2" height="1" fill="#111"/>
+              <rect x="15" y="12" width="2" height="1" fill="#111"/>
+              <rect x="18" y="12" width="1" height="1" fill="#111"/>
+              <rect x="20" y="12" width="1" height="1" fill="#111"/>
+              <rect x="14" y="13" width="2" height="1" fill="#111"/>
+              <rect x="17" y="13" width="1" height="1" fill="#111"/>
+              <rect x="19" y="13" width="2" height="1" fill="#111"/>
+              <!-- 우하단 데이터 (rows 14-20, cols 9-20) -->
+              <rect x="9" y="14" width="2" height="1" fill="#111"/>
+              <rect x="13" y="14" width="1" height="1" fill="#111"/>
+              <rect x="15" y="14" width="2" height="1" fill="#111"/>
+              <rect x="19" y="14" width="1" height="1" fill="#111"/>
+              <rect x="10" y="15" width="1" height="1" fill="#111"/>
+              <rect x="12" y="15" width="2" height="1" fill="#111"/>
+              <rect x="16" y="15" width="1" height="1" fill="#111"/>
+              <rect x="18" y="15" width="2" height="1" fill="#111"/>
+              <rect x="9" y="16" width="1" height="1" fill="#111"/>
+              <rect x="11" y="16" width="2" height="1" fill="#111"/>
+              <rect x="14" y="16" width="1" height="1" fill="#111"/>
+              <rect x="16" y="16" width="2" height="1" fill="#111"/>
+              <rect x="20" y="16" width="1" height="1" fill="#111"/>
+              <rect x="10" y="17" width="1" height="1" fill="#111"/>
+              <rect x="13" y="17" width="2" height="1" fill="#111"/>
+              <rect x="17" y="17" width="1" height="1" fill="#111"/>
+              <rect x="19" y="17" width="2" height="1" fill="#111"/>
+              <rect x="9" y="18" width="2" height="1" fill="#111"/>
+              <rect x="12" y="18" width="1" height="1" fill="#111"/>
+              <rect x="14" y="18" width="2" height="1" fill="#111"/>
+              <rect x="18" y="18" width="1" height="1" fill="#111"/>
+              <rect x="20" y="18" width="1" height="1" fill="#111"/>
+              <rect x="10" y="19" width="2" height="1" fill="#111"/>
+              <rect x="13" y="19" width="1" height="1" fill="#111"/>
+              <rect x="15" y="19" width="2" height="1" fill="#111"/>
+              <rect x="19" y="19" width="1" height="1" fill="#111"/>
+              <rect x="9" y="20" width="1" height="1" fill="#111"/>
+              <rect x="11" y="20" width="2" height="1" fill="#111"/>
+              <rect x="14" y="20" width="1" height="1" fill="#111"/>
+              <rect x="16" y="20" width="2" height="1" fill="#111"/>
+              <rect x="20" y="20" width="1" height="1" fill="#111"/>
+            </svg>
+          </div>
+          <div class="receipt-qr-label">모바일 승차권</div>
+        </div>
+        <div class="receipt-total">
+          <span class="receipt-total-label">결제금액</span>
+          <span class="receipt-total-amount" id="rc-price"></span>
+        </div>
+        <button class="pp-receipt-btn" id="pp-receipt-btn">결제내역 확인하기</button>
+      </div>
+      <div class="receipt-perf-bottom"></div>
+    </div>
+
+  </div>
 
 </div>
 

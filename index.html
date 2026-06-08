@@ -730,6 +730,25 @@
       .change-sheet { left: 0; transform: translateY(100%); width: 100%; }
       .change-sheet.open { transform: translateY(0); }
     }
+
+    /* ── 검색조건 필터 시트 ── */
+    .filter-section-label {
+      font-size: 15px; font-weight: 700; color: #0f0f0f; letter-spacing: -0.3px;
+    }
+    .filter-chips-row {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+    }
+    .filter-chip {
+      height: 36px; padding: 0 14px;
+      border: 1px solid #dbdbdb; border-radius: 999px;
+      background: white; font-size: 14px; font-weight: 500; color: #282828;
+      cursor: pointer; font-family: 'Pretendard', sans-serif;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+      white-space: nowrap;
+    }
+    .filter-chip.active {
+      background: #3a66af; border-color: #3a66af; color: white;
+    }
   </style>
 </head>
 <body>
@@ -1056,6 +1075,7 @@
       closeSortSheet();
       closeRouteSheet();
       closeDateSheet();
+      closeFilterSheet();
     }
   });
 
@@ -1090,6 +1110,27 @@
       bar.classList.remove('visible');
     }
   }
+
+  /* ════════════════════════════════════════
+     검색조건 필터 바텀시트 로직
+  ════════════════════════════════════════ */
+  function openFilterSheet() {
+    openOverlay();
+    document.getElementById('filter-sheet').classList.add('open');
+  }
+  function closeFilterSheet() {
+    document.getElementById('filter-sheet').classList.remove('open');
+    closeOverlay();
+  }
+
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('#filter-btn')) { openFilterSheet(); return; }
+    if (e.target.closest('#filter-close-btn') || e.target.closest('#filter-apply-btn')) { closeFilterSheet(); return; }
+    var chip = e.target.closest('[data-filter-chip]');
+    if (chip && chip.closest('#filter-sheet')) {
+      chip.classList.toggle('active');
+    }
+  });
 
   /* ════════════════════════════════════════
      정렬 바텀시트 로직
@@ -1635,6 +1676,36 @@
 
   <button class="cs-action-btn" id="ds-apply-btn">변경하기</button>
 
+</div>
+
+<!-- ── 검색조건 필터 바텀시트 ── -->
+<div class="change-sheet" id="filter-sheet">
+  <div class="cs-header" style="border-bottom:1px solid #f0f0f0;">
+    <span class="cs-title">검색조건</span>
+    <button class="cs-close" id="filter-close-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0f0f0f" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div style="padding:20px 20px 0;">
+    <p class="filter-section-label">자리</p>
+    <div class="filter-chips-row">
+      <button class="filter-chip active" data-filter-chip data-group="seat" data-value="일반석">일반석</button>
+      <button class="filter-chip" data-filter-chip data-group="seat" data-value="유아동반석">유아동반석</button>
+      <button class="filter-chip" data-filter-chip data-group="seat" data-value="수동휠체어석">수동휠체어석</button>
+      <button class="filter-chip" data-filter-chip data-group="seat" data-value="자동휠체어석">자동휠체어석</button>
+      <button class="filter-chip" data-filter-chip data-group="seat" data-value="2층석">2층석</button>
+      <button class="filter-chip" data-filter-chip data-group="seat" data-value="자전거석">자전거석</button>
+      <button class="filter-chip" data-filter-chip data-group="seat" data-value="대피도우미">대피도우미</button>
+    </div>
+    <p class="filter-section-label" style="margin-top:24px;">직통</p>
+    <div class="filter-chips-row">
+      <button class="filter-chip active" data-filter-chip data-group="route" data-value="직통">직통</button>
+      <button class="filter-chip" data-filter-chip data-group="route" data-value="환승">환승</button>
+    </div>
+  </div>
+  <button class="cs-action-btn" id="filter-apply-btn" style="width:calc(100% - 40px);">검색하기</button>
 </div>
 
 <!-- ── 열차비교 바텀시트 ── -->

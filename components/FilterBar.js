@@ -23,7 +23,7 @@
           '</button>',
 
           /* 필터 버튼 */
-          '<button class="filter-btn" style="gap:1px;background:white;border-color:#dbdbdb;">',
+          '<button class="filter-btn" id="filter-btn" style="gap:1px;background:white;border-color:#dbdbdb;">',
             '<span style="color:#5b5b5b;font-weight:500;">필터</span>',
             '<div style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0">',
               Icons.pageInfo,

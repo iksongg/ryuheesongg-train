@@ -37,18 +37,7 @@
     '</svg>';
 
   function trainLogo(type) {
-    switch (type) {
-      case 'KTX':        return Icons.ktxLogo(SOLDOUT_FILTER);
-      case 'SRT':        return Icons.srtLogo(SOLDOUT_FILTER);
-      case '무궁화':     return Icons.mugunghwaLogo(SOLDOUT_FILTER);
-      case '새마을':     return Icons.saemaeulLogo(SOLDOUT_FILTER);
-      case '누리로':     return Icons.nuriroLogo(SOLDOUT_FILTER);
-      case 'ITX-청춘':   return Icons.itxLogo(SOLDOUT_FILTER);
-      case 'ITX-새마을': return Icons.itxSaemaeulLogo(SOLDOUT_FILTER);
-      case 'KTX-산천':   return Icons.ktxSancheonLogo(SOLDOUT_FILTER);
-      default:
-        return '<span style="font-size:10px;font-weight:700;color:#c1c1c1">' + type + '</span>';
-    }
+    return TrainLogo.get(type, SOLDOUT_FILTER);
   }
 
   function create(data) {

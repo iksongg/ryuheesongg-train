@@ -23,18 +23,7 @@
     '</svg>';
 
   function trainLogo(type) {
-    switch (type) {
-      case 'KTX':        return Icons.ktxLogo('');
-      case 'SRT':        return Icons.srtLogo('');
-      case '무궁화':     return Icons.mugunghwaLogo('');
-      case '새마을':     return Icons.saemaeulLogo('');
-      case '누리로':     return Icons.nuriroLogo('');
-      case 'ITX-청춘':   return Icons.itxLogo('');
-      case 'ITX-새마을': return Icons.itxSaemaeulLogo('');
-      case 'KTX-산천':   return Icons.ktxSancheonLogo('');
-      default:
-        return '<span style="font-size:10px;font-weight:700;color:#333">' + type + '</span>';
-    }
+    return TrainLogo.get(type);
   }
 
   function seatSection(seat, first) {

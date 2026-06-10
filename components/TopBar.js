@@ -1,6 +1,6 @@
 (function () {
 
-  var TABS = ['전체', 'KTX', 'SRT', '새마을', '무궁화', 'ITX-청춘'];
+  var TABS = ['전체', 'KTX', 'KTX-산천', 'ITX-새마을', '무궁화'];
 
   function create(props) {
     var p = props || {};

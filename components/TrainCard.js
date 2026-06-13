@@ -26,7 +26,7 @@
     return TrainLogo.get(type);
   }
 
-  function seatSection(seat, first) {
+  function seatSection(seat, first, trainNumber, seatIdx) {
     var borderRight = first ? 'border-right:1px solid #e0eaf8;' : '';
     if (seat.dash) {
       return '<div class="seat-section" style="' + borderRight + '">' +
@@ -38,7 +38,9 @@
                '<span class="seat-label' + (seat.labelClass ? ' ' + seat.labelClass : '') + '">' + seat.label + '</span>' +
                '<span class="seat-count ' + (seat.countClass || '') + '">' + (seat.count || '') + '</span>' +
              '</div>' +
-             '<div class="price">' + (seat.price || '') + '</div>' +
+             '<button class="price" data-price-btn data-train-number="' + trainNumber + '" data-seat-idx="' + seatIdx + '">' +
+               (seat.price || '') +
+             '</button>' +
            '</div>';
   }
 
@@ -89,8 +91,8 @@
 
         /* 푸터 */
         '<div class="card-footer">',
-          seatSection(data.seats[0], true),
-          seatSection(data.seats[1], false),
+          seatSection(data.seats[0], true,  data.trainNumber, 0),
+          seatSection(data.seats[1], false, data.trainNumber, 1),
         '</div>',
 
       '</div>',

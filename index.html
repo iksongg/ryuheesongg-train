@@ -16,10 +16,12 @@
       align-items: flex-start;
       min-height: 100vh;
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow-x: hidden;
     }
 
     .phone-frame {
-      width: 402px;
+      width: 100%;
+      max-width: 402px;
       min-height: 100vh;
       background: #f5f5f5;
       position: relative;
@@ -28,7 +30,7 @@
 
     /* ── 상단바 ── */
     .top-bar {
-      width: 402px;
+      width: 100%;
       background: white;
       border-bottom: 1px solid #dbdbdb;
       position: sticky;
@@ -161,7 +163,7 @@
     /* ── 필터바 ── */
     /* 48(route) + 48(date) + 48(tabs) = 144px */
     .filter-bar {
-      width: 402px;
+      width: 100%;
       height: 60px;
       background: white;
       border-bottom: 1px solid #f0f0f0;
@@ -439,6 +441,19 @@
       font-size: 16px;
       font-weight: 700;
       color: #3a66af;
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: center;
+      display: block;
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
 
@@ -474,7 +489,7 @@
       bottom: 0;
       left: 50%;
       transform: translateX(-50%) translateY(100%);
-      width: 402px;
+      width: 100%; max-width: 402px;
       height: 565px;
       background: white;
       border-radius: 8px 8px 0 0;
@@ -533,7 +548,7 @@
       bottom: 0;
       left: 50%;
       transform: translateX(-50%) translateY(100%);
-      width: 402px;
+      width: 100%; max-width: 402px;
       background: white;
       border-radius: 8px 8px 0 0;
       z-index: 301;
@@ -754,7 +769,7 @@
     .booking-sheet {
       position: fixed; bottom: 0; left: 50%;
       transform: translateX(-50%) translateY(100%);
-      width: 402px; background: white;
+      width: 100%; max-width: 402px; background: white;
       border-radius: 16px 16px 0 0;
       z-index: 302;
       display: flex; flex-direction: column;
@@ -822,7 +837,7 @@
     .sm-sheet {
       position: fixed; bottom: 0; left: 50%;
       transform: translateX(-50%) translateY(100%);
-      width: 402px; height: 82vh;
+      width: 100%; max-width: 402px; height: 82vh;
       background: white; border-radius: 16px 16px 0 0;
       z-index: 351; display: flex; flex-direction: column;
       transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
@@ -937,7 +952,7 @@
     .payment-page {
       position: fixed;
       top: 0; bottom: 0; left: 0; right: 0;
-      width: 402px; margin: 0 auto;
+      width: 100%;
       background: #f5f5f5;
       z-index: 400;
       display: flex; flex-direction: column;
@@ -1890,10 +1905,20 @@
 
   /* 가격 버튼 */
   document.addEventListener('click', function(e){
-    var btn = e.target.closest('[data-price-btn]');
+    var btn = e.target.closest('.price');
     if (!btn) return;
     e.stopPropagation();
-    openBookingSheet(btn.getAttribute('data-train-number'), parseInt(btn.getAttribute('data-seat-idx')||'0',10));
+    var card = btn.closest('[data-compare-id]');
+    var trainNumber = card ? card.getAttribute('data-compare-id') : '';
+    var footer = btn.closest('.card-footer');
+    var seatIdx = 0;
+    if (footer) {
+      var sections = footer.querySelectorAll('.seat-section');
+      for (var i = 0; i < sections.length; i++) {
+        if (sections[i].contains(btn)) { seatIdx = i; break; }
+      }
+    }
+    openBookingSheet(trainNumber, seatIdx);
   });
 
   /* 오버레이 클릭 → 예약 시트 닫기 */
